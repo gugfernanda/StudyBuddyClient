@@ -21,6 +21,7 @@
             <button type = "submit">Add</button>
         </form>
 
+
     </div>
   </template>
   
@@ -33,7 +34,7 @@
     data() {
         return {
             users: [], //stores the list of users
-            newUser: { username: "", full_name: "", email: "", password: "" } //form data for adding new user
+            newUser: { username: "", full_name: "", email: "", password: "" } //form data for adding new user test
         };
     },
 
