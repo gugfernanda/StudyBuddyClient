@@ -9,9 +9,10 @@
                 <h2>Login</h2>
                 <form @submit.prevent="login">
 
-                    <input type="text" v-model="username" placeholder="Username or Email" required />
+                    <input type="text" v-model="emailOrUsername" placeholder="Username or Email" required />
                     <input type="password" v-model="password" placeholder="Password" required />
                     <button type="submit">Login</button>
+                    <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
 
                 </form>
                 <p class="signup-text">
@@ -25,18 +26,27 @@
 
 <script>
 
+import AuthService from "../services/AuthService.js";
+
 export default {
     name: "WelcomeView",
     data() {
         return {
-            username: "",
+            emailOrUsername: "",
             password: "",
+            errorMessage: ""
         };
     },
     methods: {
-        login() {
-            console.log("Logging in with", this.username, this.password);
-            //aici o sa vina logica de autentificare
+        async login() {
+            try {
+                const user = await AuthService.login(this.emailOrUsername, this.password);
+                console.log("User logged in:", user);
+                alert("Login successful!");
+                //this.$router.push('/dashboard');
+            } catch (error) {
+                this.errorMessage = error.response ? error.response.data : "Login failed.";
+            }
         }
     }
 };
@@ -114,7 +124,7 @@ input {
     font-size: 16px;
     background-color: #ffffff;
     color: #333;
-    transition: all 0.3s easi-in-out;
+    transition: all 0.3s ease-in-out;
 }
 
 input:focus {
@@ -151,7 +161,7 @@ button:active {
     color: #333;
 }
 
-.singup-link {
+.signup-link {
     color: #e91ea5;
     font-weight: bold;
     text-decoration: none;
@@ -161,6 +171,12 @@ button:active {
 
 .signup-link:hover {
     text-decoration: underline;
+}
+
+.error-message {
+    color: red;
+    margin-top: 10px;
+    font-size: 14px;
 }
 
 </style>
