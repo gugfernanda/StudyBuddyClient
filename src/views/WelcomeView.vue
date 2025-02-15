@@ -1,29 +1,3 @@
-<template>
-    <div class="container">
-        <div class="left">
-            <h1>Welcome to Study Buddy</h1>
-            <p>Organize your tasks and boost your productivity.</p>
-        </div>
-        <div class="right">
-            <div class="login-box">
-                <h2>Login</h2>
-                <form @submit.prevent="login">
-
-                    <input type="text" v-model="emailOrUsername" placeholder="Username or Email" required />
-                    <input type="password" v-model="password" placeholder="Password" required />
-                    <button type="submit">Login</button>
-                    <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
-
-                </form>
-                <p class="signup-text">
-                    Don't have an account?
-                    <router-link to="/signup" class="signup-link">Sign up</router-link>
-                </p>
-            </div>
-        </div>
-    </div>
-</template>
-
 <script>
 
 import AuthService from "../services/AuthService.js";
@@ -52,6 +26,37 @@ export default {
 };
 
 </script>
+
+
+<template>
+    <div class="container">
+        <div class="left">
+            <h1>Getting your degree can be <span>tough</span>, but you don’t have to do it alone.</h1>
+<p>With <span>Study Buddy</span>, staying organized and on top of your tasks has <span>never been easier!</span></p>
+
+            
+        </div>
+        <div class="right">
+            <div class="login-box">
+               
+                <form @submit.prevent="login">
+
+                    <input type="text" v-model="emailOrUsername" placeholder="Username or Email" required />
+                    <input type="password" v-model="password" placeholder="Password" required />
+                    <button type="submit">Login</button>
+                    <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
+
+                </form>
+                <p class="signup-text">
+                    Don't have an account?
+                    <router-link to="/signup" class="signup-link">Sign up</router-link>
+                </p>
+            </div>
+        </div>
+    </div>
+</template>
+
+
 
 
 
@@ -89,6 +94,28 @@ html, body {
     align-items: center;
     text-align: center;
     padding: 40px;
+}
+
+.left h1 {
+    font-size: 2.3rem; /* Titlu clar și vizibil */
+    font-weight: bold;
+    max-width: 70%;
+    line-height: 1.3;
+    margin-bottom: 10px;
+}
+
+.left p {
+    font-size: 1.2rem; /* Paragraf mai mic și mai aerisit */
+    font-weight: normal;
+    max-width: 70%;
+    line-height: 1.6;
+    color: #d0d0d0; /* Gri deschis pentru contrast */
+}
+
+/* Accente roz pe cuvintele cheie */
+.left span {
+    color: #e91ea5;
+    font-weight: bold;
 }
 
 

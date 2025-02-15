@@ -1,3 +1,53 @@
+<script>
+import UserService from "../services/UserService.js";
+
+
+
+export default {
+  data() {
+      return {
+          users: [], //stores the list of users
+          newUser: { username: "", full_name: "", email: "", password: "" } //form data for adding new user test
+      };
+  },
+
+  async created() {
+      await this.fetchUsers();  //load users when the component is created
+  },
+
+  methods: {
+      async fetchUsers() {
+          try {
+              this.users = await UserService.getAllUsers();
+          } catch (error) {
+              console.error("Error fetching users:", error);
+          }
+      },
+
+      async addUser() {
+          try {
+              await UserService.createUser(this.newUser);
+              this.newUser = { username: "", full_name: "", email: "", password: "" }; //reset form
+              await this.fetchUsers();  //refresh user list
+          } catch (error) {
+              console.error("Error adding user:", error);
+          }
+      },
+
+      async deleteUser(id) {
+          try {
+              await UserService.deleteUser(id);
+              await this.fetchUsers();  //refresh user list after deletion
+          } catch (error) {
+              console.error("Error deleting user:", error);
+          }
+      }
+  }
+};
+</script>
+
+
+
 <template>
     <div class="container">
         <h1>User List</h1>
@@ -25,54 +75,6 @@
     </div>
   </template>
   
-  <script>
-  import UserService from "../services/UserService.js";
-
-
-
-  export default {
-    data() {
-        return {
-            users: [], //stores the list of users
-            newUser: { username: "", full_name: "", email: "", password: "" } //form data for adding new user test
-        };
-    },
-
-    async created() {
-        await this.fetchUsers();  //load users when the component is created
-    },
-
-    methods: {
-        async fetchUsers() {
-            try {
-                this.users = await UserService.getAllUsers();
-            } catch (error) {
-                console.error("Error fetching users:", error);
-            }
-        },
-
-        async addUser() {
-            try {
-                await UserService.createUser(this.newUser);
-                this.newUser = { username: "", full_name: "", email: "", password: "" }; //reset form
-                await this.fetchUsers();  //refresh user list
-            } catch (error) {
-                console.error("Error adding user:", error);
-            }
-        },
-
-        async deleteUser(id) {
-            try {
-                await UserService.deleteUser(id);
-                await this.fetchUsers();  //refresh user list after deletion
-            } catch (error) {
-                console.error("Error deleting user:", error);
-            }
-        }
-    }
-  };
-  </script>
-
 
 <style scoped>
 
