@@ -12,7 +12,14 @@ const AuthService = {
                 emailOrUsername,
                 password
             });
-            return response.data;  //returneaza datele utilizatorului daca reuseste
+
+            if(response.status === 200) {
+                localStorage.setItem("user", JSON.stringify(response.data))  //salveaza userul in local storage
+                return response.data;
+            } else {
+                throw new Error("Login failed");
+            }
+
         } catch (error) {
             console.error("Login error:", error.response ? error.response.data : error.message);
             throw error;
@@ -33,6 +40,19 @@ const AuthService = {
             return response.data;
         } catch (error) {
             console.error("Registration error:", error.response ? error.response.data : error.message);
+        }
+    },
+    async logout() {
+        try {
+            await axios.post(API_URL + "/logout", {}, {
+                withCredentials: true
+            });
+
+            localStorage.removeItem("user");
+            console.log("User logged out successfully");
+        } catch (error) {
+            console.error("Logout error:", error.response ? error.response.data : error.message);
+            throw error;
         }
     }
 };

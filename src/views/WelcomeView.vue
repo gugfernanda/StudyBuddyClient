@@ -15,9 +15,15 @@ export default {
         async login() {
             try {
                 const user = await AuthService.login(this.emailOrUsername, this.password);
-                console.log("User logged in:", user);
-                alert("Login successful!");
-                //this.$router.push('/dashboard');
+
+                if(user) {
+                    console.log("User logged in:", user);
+                    alert("Login successful!");
+                    this.$router.push('/dashboard');
+                } else {
+                    this.errorMessage = "Invalid credentials, please try again.";
+                }
+                
             } catch (error) {
                 this.errorMessage = error.response ? error.response.data : "Login failed.";
             }
