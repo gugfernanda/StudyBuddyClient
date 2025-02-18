@@ -12,11 +12,33 @@ export default {
             confirmPassword: "",
             showPassword: false,
             showConfirmPassword: false,
-            errorMessage: ""
+            errorMessage: "",
+            successMessage: ""
         };
     },
     methods: {
         async register () {
+
+            this.errorMessage = "";
+            this.successMessage = "";
+
+            if(this.password.length < 8) {
+                this.errorMessage = "Password must be at least 8 characters long";
+                return;
+            }
+            if(!/[A-Z]/.test(this.password)) {
+                this.errorMessage = "Password must contain at least one uppercase letter";
+                return;
+            }
+            if(!/\d/.test(this.password)) {
+                this.errorMessage = "Password must contain at least one digit";
+                return;
+            }
+            if(!/[@$!%*?&]/.test(this.password)) {
+                this.errorMessage = "Password must contain at least one special character";
+                return;
+            }
+
             if(this.password !== this.confirmPassword) {
                 this.errorMessage = "Passwords do not match!";
                 return;
@@ -24,12 +46,24 @@ export default {
 
             try {
                 const user = await AuthService.register(this.username, this.fullName, this.email, this.password);
+
                 console.log("User registered:", user);
-                alert("Account created successfully! You can now log in.");
+
+                this.successMessage = "Account created successfully! You can now log in.";
+                this.username = "";
+                this.fullName = "";
+                this.email = "";
+                this.password = "";
+                this.confirmPassword = "";
+
+                setTimeout(() => {
                 this.$router.push("/");
+                }, 2000);
             } catch (error) {
                 this.errorMessage = error.response ? error.response.data : "Sign up failed. Please try again.";
                 console.error("Sign up error:", error);
+
+                return;
             }
         },
         togglePassword() {
@@ -65,8 +99,11 @@ export default {
                     </span>
                 </div>
 
+                <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+                <p v-if="successMessage" class="success-message">{{ successMessage }}</p>
+
                 <button type="submit">Sign Up</button>
-                <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
+                
             </form>
             <p class="login-text">
                 Already have an account?
