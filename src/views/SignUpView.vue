@@ -10,6 +10,8 @@ export default {
             email: "",
             password: "",
             confirmPassword: "",
+            showPassword: false,
+            showConfirmPassword: false,
             errorMessage: ""
         };
     },
@@ -29,6 +31,12 @@ export default {
                 this.errorMessage = error.response ? error.response.data : "Sign up failed. Please try again.";
                 console.error("Sign up error:", error);
             }
+        },
+        togglePassword() {
+            this.showPassword = !this.showPassword;
+        },
+        toggleConfirmPassword() {
+            this.showConfirmPassword = !this.showConfirmPassword;
         }
     }
 }
@@ -42,8 +50,21 @@ export default {
                 <input type="text" v-model="fullName" placeholder="Full Name" required />
                 <input type="text" v-model="username" placeholder="Username" required />
                 <input type="email" v-model="email" placeholder="Email" required />
-                <input type="password" v-model="password" placeholder="Password" required />
-                <input type="password" v-model="confirmPassword" placeholder="Confirm Password" required />
+                
+                <div class="password-container">
+                    <input :type="showPassword ? 'text' : 'password'" v-model="password" placeholder="Password" required />
+                    <span class="toggle-password" @click="togglePassword">
+                        <i :class="showPassword ? 'mdi mdi-eye-off' : 'mdi mdi-eye'"></i>
+                    </span>
+                </div>
+
+                <div class="password-container">
+                    <input :type="showConfirmPassword ? 'text' : 'password'" v-model="confirmPassword" placeholder="Confirm Password" required />
+                    <span class="toggle-password" @click="toggleConfirmPassword">
+                        <i :class="showConfirmPassword ? 'mdi mdi-eye-off' : 'mdi mdi-eye'"></i>
+                    </span>
+                </div>
+
                 <button type="submit">Sign Up</button>
                 <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
             </form>
@@ -57,7 +78,7 @@ export default {
 
 
 <style scoped>
-/* Asigură că pagina ocupă tot ecranul */
+
 .signup-container {
     display: flex;
     justify-content: center;
@@ -67,7 +88,7 @@ export default {
     background-color: #f4f4f4;
 }
 
-/* Caseta de sign-up */
+
 .signup-box {
     background: white;
     padding: 30px;
@@ -82,7 +103,7 @@ h2 {
     color: #002241;
 }
 
-/* Input field styling */
+
 input {
     width: 100%;
     padding: 10px;
@@ -101,7 +122,29 @@ input:focus {
     box-shadow: 0px 0px 5px rgba(233, 30, 99, 0.5);
 }
 
-/* Buton de submit */
+.password-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-container input {
+    width: 100%;
+    padding-right: 40px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    font-size: 20px;
+    color: #888;
+}
+
+.toggle-password:hover {
+    color: #555;
+}
+
 button {
     width: 100%;
     padding: 10px;

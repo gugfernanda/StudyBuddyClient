@@ -8,6 +8,7 @@ export default {
         return {
             emailOrUsername: "",
             password: "",
+            showPassword: false,
             errorMessage: ""
         };
     },
@@ -27,6 +28,9 @@ export default {
             } catch (error) {
                 this.errorMessage = error.response ? error.response.data : "Login failed.";
             }
+        },
+        togglePassword() {
+            this.showPassword = !this.showPassword;
         }
     }
 };
@@ -37,7 +41,7 @@ export default {
 <template>
     <div class="container">
         <div class="left">
-            <h1>Getting your degree can be <span>tough</span>, but you don’t have to do it alone.</h1>
+            <h1>Getting your degree can be <span>tough</span>, but you don't have to do it alone.</h1>
 <p>With <span>Study Buddy</span>, staying organized and on top of your tasks has <span>never been easier!</span></p>
 
             
@@ -48,7 +52,21 @@ export default {
                 <form @submit.prevent="login">
 
                     <input type="text" v-model="emailOrUsername" placeholder="Username or Email" required />
-                    <input type="password" v-model="password" placeholder="Password" required />
+
+                    <div class="password-container">
+                        <input
+                            :type="showPassword ? 'text' : 'password'"
+                            v-model="password"
+                            placeholder="Password"
+                            required
+                        />
+
+                        <span class="toggle-password" @click="togglePassword">
+                            <span :class="showPassword ? 'mdi mdi-eye-off' : 'mdi mdi-eye'"></span>
+                        </span>
+
+                    </div>
+
                     <button type="submit">Login</button>
                     <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
 
@@ -210,6 +228,33 @@ button:active {
     color: red;
     margin-top: 10px;
     font-size: 14px;
+}
+
+.password-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-container input {
+    width: 100%;
+    padding: 10px;
+    padding-right: 40px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    font-size: 20px;
+    color: #888;
+}
+
+.toggle-password:hover {
+    color: #555;
 }
 
 </style>
