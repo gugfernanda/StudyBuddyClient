@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="app-container" >
     <router-view />
   </div>
 </template>
@@ -11,26 +11,28 @@ export default {
 </script>
 
 <style>
-/* Elimină orice margine sau padding global */
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* Elimină orice spațiu alb în jurul aplicației */
+
 html, body {
   height: 100%;
   width: 100%;
   overflow: hidden;
-  background-color: #1a1a1a; /* Asigură că nu se vede fundal alb */
+  background-color: #1a1a1a; 
+  display: flex;
 }
 
-/* Asigură că aplicația ocupă TOT ecranul */
+
 .app-container {
+  flex-grow: 1;
+  display: flex;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  display: flex;
 }
 </style>

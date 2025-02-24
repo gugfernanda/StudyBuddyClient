@@ -24,14 +24,22 @@ export default {
 </script>
 
 <template>
-    <aside class="sidebar">
-        <h2>Study Buddy</h2>
+     <aside class="sidebar">
+        <h2 class="logo">SB</h2>
         <nav>
             <ul>
-                <li @click="changeSection('tasks')" :class="{ active: currentSection === 'tasks' }">My Tasks</li>
-                <li @click="changeSection('completed')" :class="{ active: currentSection === 'completed' }">Completed</li>
-                <li @click="changeSection('categories')" :class="{ active: currentSection === 'categories'}">Categories</li>
-                <li class="logout" @click="logout">Logout</li>
+                <li @click="changeSection('tasks')" :class="{ active: currentSection === 'tasks' }">
+                    <span class="mdi mdi-format-list-bulleted"></span> My Tasks
+                </li>
+                <li @click="changeSection('completed')" :class="{ active: currentSection === 'completed' }">
+                    <span class="mdi mdi-check-circle"></span> Completed
+                </li>
+                <li @click="changeSection('categories')" :class="{ active: currentSection === 'categories'}">
+                    <span class="mdi mdi-folder"></span> Categories
+                </li>
+                <li class="logout" @click="logout">
+                    <span class="mdi mdi-logout"></span> Logout
+                </li>
             </ul>
         </nav>
     </aside>
@@ -40,7 +48,7 @@ export default {
 <style scoped>
 
 .sidebar {
-    width: 250px;
+    width: 220px;
     background-color: #002241;
     color: white;
     padding: 20px;
@@ -48,10 +56,14 @@ export default {
     flex-direction: column;
 }
 
-.sidebar h2 {
+.logo {
     text-align: center;
+    font-size: 24px;
+    font-weight: bold;
     margin-bottom: 20px;
+    color: #e91ea5;
 }
+
 
 .sidebar ul {
     list-style: none;
@@ -59,18 +71,26 @@ export default {
 }
 
 .sidebar ul li {
-    padding: 10px;
+    padding: 12px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     transition: background-color 0.3s;
+}
+
+.sidebar ul li span {
+    font-size: 20px;
 }
 
 .sidebar ul li:hover, .active {
     background-color: #004080;
+    border-radius: 5px;
 }
 
 .logout {
     margin-top: auto;
-    color: red;
+    color: #e91ea5;
     font-weight: bold;
 }
 

@@ -1,10 +1,11 @@
 <script>
 
 import SidebarDashboard from "../components/SidebarDashboard.vue";
+import NavBar from "../components/NavBar.vue";
 
 export default {
     name: "DashboardView",
-    components: { SidebarDashboard },
+    components: { SidebarDashboard, NavBar },
     data() {
         return {
             currentSection: "tasks"
@@ -38,23 +39,22 @@ export default {
 <template>
     <div class="dashboard-container">
         <SidebarDashboard :currentSection="currentSection" @sectionChanged="changeSection" />
-
-        <main class="content">
-            <h1>{{ sectionTitle }}</h1>
-            <div v-if="currentSection === 'tasks'">
-                <p>Here will be the task list...</p>
-
+        
+        <div class="main-content">
+            <NavBar />
+            <div class="dashboard-content">
+                <h1>{{ sectionTitle }}</h1>
+                <div v-if="currentSection === 'tasks'">
+                    <p>Here will be the task list...</p>
+                </div>
+                <div v-if="currentSection === 'completed'">
+                    <p>Here will be the completed tasks...</p>
+                </div>
+                <div v-if="currentSection === 'categories'">
+                    <p>Here will be the categories...</p>
+                </div>
             </div>
-            <div v-if="currentSection === 'completed'">
-                <p>Here will be the completed tasks...</p>
-
-            </div>
-            <div v-if="currentSection === 'categories'">
-                <p>Here will be the categories...</p>
-
-            </div>
-        </main>
-
+        </div>
     </div>
 </template>
 
@@ -64,12 +64,19 @@ export default {
     display: flex;
     height: 100vh;
     width: 100vw;
+    overflow: hidden;
 }
 
-.content {
+.main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #f4f4f4;
+}
+
+.dashboard-content {
     flex-grow: 1;
     padding: 20px;
-    background-color: #f4f4f4;
 }
 
 h1 {

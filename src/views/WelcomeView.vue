@@ -19,7 +19,7 @@ export default {
 
                 if(user) {
                     console.log("User logged in:", user);
-                    alert("Login successful!");
+                    //alert("Login successful!");
                     this.$router.push('/dashboard');
                 } else {
                     this.errorMessage = "Invalid credentials, please try again.";
