@@ -8,6 +8,10 @@ export default {
         changeSection(section) {
             this.$emit("sectionChanged", section);
         },
+        async handleTasksClick() {
+            this.changeSection("tasks");
+            this.$emit("fetchTasks");
+        },
         async logout() {
             try {
                 await AuthService.logout();
@@ -28,7 +32,7 @@ export default {
         <h2 class="logo">SB</h2>
         <nav>
             <ul>
-                <li @click="changeSection('tasks')" :class="{ active: currentSection === 'tasks' }">
+                <li @click="handleTasksClick" :class="{ active: currentSection === 'tasks' }">
                     <span class="mdi mdi-format-list-bulleted"></span> My Tasks
                 </li>
                 <li @click="changeSection('completed')" :class="{ active: currentSection === 'completed' }">
