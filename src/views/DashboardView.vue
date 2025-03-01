@@ -14,7 +14,11 @@ export default {
             tasks: [],
             username: "",
             loading: true,
-            errorMessage: ""
+            errorMessage: "",
+            showAddTaskModal: false,
+            newTaskText: "",
+            newTaskState: "TO_DO",
+            taskStates: ["TO_DO", "IN_PROGRESS", "DONE"],
         };
     },
     computed: {
@@ -51,9 +55,7 @@ export default {
             }
             try {
                 this.loading = true;
-                console.log(`Fetching tasks for user: ${this.username}`);
                 const tasks = await TaskService.getUserTasks(this.username);
-                console.log("Tasks received:", tasks);
                 this.tasks = tasks;
                 this.errorMessage = "";
             } catch (error) {
@@ -64,9 +66,40 @@ export default {
             }
         },
 
-        async testGetCurrentUser() {
-            const user = await AuthService.getCurrentUser();
-            console.log("User from test button:", user);
+        async addTask() {
+            if(!this.newTaskText.trim()) {
+                alert("Task text cannot be empty!");
+                return;
+            }
+
+            try {
+                const newTask = {
+                    text: this.newTaskText,
+                    state: this.newTaskState,
+                    username: this.username,
+                };
+
+                //console.log("Sending task:", newTask);
+
+                const createdTask = await TaskService.createTask(newTask);
+                
+                //console.log("Task created successfully:", createdTask);
+                //console.log("Current tasks before push:", this.tasks)
+
+                if (!Array.isArray(this.tasks)) {
+                    //console.warn("this.tasks was undefined. Initializing it now.");
+                    this.tasks = [];
+                }
+
+                this.tasks.push(createdTask);
+                //console.log("Task added successfully:", this.tasks);
+                this.newTaskText = "";
+                this.newTaskState = "TO_DO";
+                this.showAddTaskModal = false;
+            } catch(error) {
+                console.error("Error adding task:", error);
+                alert("Failed to add task. Please try again.");
+            }
         }
     },
 
@@ -74,17 +107,17 @@ export default {
         async created() {
             try {
 
-                console.log("Calling getCurrentUser() on page load...");
+                //console.log("Calling getCurrentUser() on page load...");
 
                 const user = await AuthService.getCurrentUser();
 
-                console.log("User received on load:", user);
+                //console.log("User received on load:", user);
 
                 if(user && user.username) {
                     this.username = user.username;
 
-                    console.log("Username set:", this.username);
-                    console.log("Calling fetchTasks()...");
+                    //console.log("Username set:", this.username);
+                    //console.log("Calling fetchTasks()...");
 
                     await this.fetchTasks();
                 } else {
@@ -112,7 +145,10 @@ export default {
         <div class="main-content">
             <NavBar />
             <div class="dashboard-content">
-                <h1>{{ sectionTitle }}</h1>
+                <div class="header">
+                    <h1 class="tasks-title">{{ sectionTitle }}</h1>
+                    <button class="add-task-button" @click="showAddTaskModal = true">+ Add Task</button>
+                </div>
 
 
 
@@ -127,6 +163,7 @@ export default {
                     </ul>
                     <p v-else>No tasks available.</p>
                 </div>
+                
 
                 <div v-if="currentSection === 'completed'">
                     <p>Here will be the completed tasks...</p>
@@ -134,6 +171,28 @@ export default {
                 <div v-if="currentSection === 'categories'">
                     <p>Here will be the categories...</p>
                 </div>
+
+                <div v-if="showAddTaskModal" class="modal-overlay">
+                    <div class="modal">
+                        <h2>Add New Task</h2>
+                        <input v-model="newTaskText" type="text" placeholder="Enter task..." />
+
+                        <div class="task-state-container">
+                            <label for="taskState">Select Task State:</label>
+                            <select id="taskState" v-model="newTaskState">
+                                <option v-for="state in taskStates" :key="state" :value="state">
+                                    {{ state.replace("_", " ") }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="modal-buttons">
+                            <button class="save-button" @click="addTask">Save</button>
+                            <button class="cancel-button" @click="showAddTaskModal = false">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -153,6 +212,132 @@ export default {
     display: flex;
     flex-direction: column;
     background-color: #f4f4f4;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 0 10px;
+}
+
+.tasks-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #002241;
+    margin: 0;
+}
+
+.add-task-button {
+    background-color: #e91ea5;
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 14px;
+    width: auto;
+    min-width: 120px;
+    text-align: center;
+}
+
+.add-task-button:hover {
+    background-color: #d81b80;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 320px;
+    text-align: center;
+}
+
+.modal input {
+    width: 100%;
+    padding: 8px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.task-state-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+.modal label {
+    font-weight: bold;
+    margin-right: 10px;
+    white-space: nowrap;
+}
+
+.modal select {
+    width: 160px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.save-button {
+    background-color: #e91ea5;
+    color: white;
+    /* padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer; */
+}
+
+.cancel-button {
+    background-color: #002241;
+    color: white;
+    /* padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer; */
+}
+
+.save-button, .cancel-button {
+    flex: 1;
+    padding: 10px;
+    margin: 0 5px; 
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.save-button:hover {
+    background-color: #d81b80;
+}
+
+.cancel-button:hover {
+    background-color: #00172e;
 }
 
 .dashboard-content {
