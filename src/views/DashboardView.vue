@@ -33,6 +33,20 @@ export default {
                 default:
                     return "";
             }
+        },
+        // sortedTasks() {
+        //     return  [...this.tasks].sort((a, b) => {
+        //         const order = { "TO_DO": 1, "IN_PROGRESS": 2, "DONE": 3 };
+        //         return order[a.state] - order[b.state];
+        //     })
+        // }
+
+        groupedTasks() {
+            return {
+                TO_DO: this.tasks.filter(task => task.state === "TO_DO"),
+                IN_PROGRESS: this.tasks.filter(task => task.state === "IN_PROGRESS"),
+                DONE: this.tasks.filter(task => task.state === "DONE"),
+            };
         }
     },
     methods: {
@@ -188,9 +202,9 @@ export default {
                 <p v-if="loading">Loading tasks...</p>
                 <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
 
-                <div v-if="currentSection === 'tasks'" class="task-list">
-                    <ul v-if="tasks.length > 0">
-                        <li v-for="task in tasks" :key="task.id" class="task-item">
+                <!-- <div v-if="currentSection === 'tasks'" class="task-list">
+                    <ul v-if="sortedTasks.length > 0">
+                        <li v-for="task in sortedTasks" :key="task.id" class="task-item">
                             <span>{{ task.text }}</span> 
                             <div class="task-controls">
                             <select v-model="task.state" @change="updateTaskState(task)" class="task-state-select">
@@ -207,7 +221,61 @@ export default {
                         </li>
                     </ul>
                     <p v-else>No tasks available.</p>
+                </div> -->
+
+                <div v-if="currentSection === 'tasks'" class="task-list">
+    <div v-if="groupedTasks.TO_DO.length">
+        <h2 class="task-section-title">To Do</h2>
+        <ul>
+            <li v-for="task in groupedTasks.TO_DO" :key="task.id" class="task-item">
+                <span>{{ task.text }}</span> 
+                <div class="task-controls">
+                    <select v-model="task.state" @change="updateTaskState(task)" class="task-state-select">
+                        <option v-for="state in taskStates" :key="state" :value="state">
+                            {{ state.replace("_", " ") }}
+                        </option>
+                    </select>
                 </div>
+            </li>
+        </ul>
+    </div>
+
+    <div v-if="groupedTasks.IN_PROGRESS.length">
+        <h2 class="task-section-title">In Progress</h2>
+        <ul>
+            <li v-for="task in groupedTasks.IN_PROGRESS" :key="task.id" class="task-item">
+                <span>{{ task.text }}</span> 
+                <div class="task-controls">
+                    <select v-model="task.state" @change="updateTaskState(task)" class="task-state-select">
+                        <option v-for="state in taskStates" :key="state" :value="state">
+                            {{ state.replace("_", " ") }}
+                        </option>
+                    </select>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <div v-if="groupedTasks.DONE.length">
+        <h2 class="task-section-title">Done</h2>
+        <ul>
+            <li v-for="task in groupedTasks.DONE" :key="task.id" class="task-item">
+                <span>{{ task.text }}</span> 
+                <div class="task-controls">
+                    <select v-model="task.state" @change="updateTaskState(task)" class="task-state-select">
+                        <option v-for="state in taskStates" :key="state" :value="state">
+                            {{ state.replace("_", " ") }}
+                        </option>
+                    </select>
+                    <button @click="deleteTask(task.id)" class="task-delete">
+                        <i class="mdi mdi-trash-can-outline"></i>
+                    </button>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
                 
 
                 <div v-if="currentSection === 'completed'">
@@ -292,6 +360,17 @@ export default {
     overflow-y: auto;
     height: 100vh;
 }
+
+.task-section-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #002241;
+    margin: 20px 0 10px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #e91ea5;
+    margin-left: 5px;
+}
+
 
 .header {
     display: flex;
