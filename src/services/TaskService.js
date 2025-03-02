@@ -16,6 +16,11 @@ const TaskService = {
         }
     },
 
+    async updateTaskState(taskId, newState) {
+        return await axios.put(`${API_URL}/update-state/${taskId}`, { state: newState }, { withCredentials: true });
+        
+    },
+
     async createTask(taskData) {
         try {
             const response = await axios.post(`${API_URL}/create`, taskData, { withCredentials: true });
@@ -26,6 +31,26 @@ const TaskService = {
             return response.data;
         } catch (error) {
             console.error("Error creating task:", error);
+            throw error;
+        }
+    },
+
+    async deleteTask(taskId) {
+        try {
+            const response = await axios.delete(`${API_URL}/delete/${taskId}`, { withCredentials: true });
+            return response.data;
+        } catch (error) {
+            console.error("Error deleting task:", error);
+            throw error;
+        }
+    },
+
+    async clearCompletedTasks() {
+        try {
+            const response = await axios.delete(`${API_URL}/delete-completed`, { withCredentials: true });
+            return response.data; 
+        } catch (error) {
+            console.error("Error deleting completed tasks:", error);
             throw error;
         }
     }

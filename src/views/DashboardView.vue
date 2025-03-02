@@ -66,6 +66,34 @@ export default {
             }
         },
 
+        async updateTaskState(task) {
+            try {
+                await TaskService.updateTaskState(task.id, task.state);
+            } catch (error) {
+                alert("Failed to update task. Please try again.");
+            }
+        },
+
+        async deleteTask(taskId) {
+            try {
+                await TaskService.deleteTask(taskId);
+                this.tasks = this.tasks.filter(task => task.id !== taskId);
+            } catch (error) {
+                console.error("Error deleting task:", error);
+                alert("Failed to delete task. Please try again.");
+            }
+        },
+
+        async clearCompletedTasks() {
+            try {
+                await TaskService.clearCompletedTasks();
+                this.tasks = this.tasks.filter(task => task.state !== "DONE");
+            } catch (error) {
+                console.error("Error clearing completed tasks:", error);
+                alert("Failed to clear completed tasks.");
+            }
+        },
+
         async addTask() {
             if(!this.newTaskText.trim()) {
                 alert("Task text cannot be empty!");
@@ -130,6 +158,7 @@ export default {
                 console.error(error);
             }
         }
+
     };
 </script>
 
@@ -147,18 +176,34 @@ export default {
             <div class="dashboard-content">
                 <div class="header">
                     <h1 class="tasks-title">{{ sectionTitle }}</h1>
-                    <button class="add-task-button" @click="showAddTaskModal = true">+ Add Task</button>
+                    <div class="task-buttons">
+                        <button class="add-task-button" @click="showAddTaskModal = true">+ Add Task</button>
+                        <button class="clear-completed-btn" v-if="tasks.some(task => task.state === 'DONE')" @click="clearCompletedTasks">
+                            <i class="mdi mdi-delete-sweep"></i> Clear Completed
+                        </button>
+                    </div>
                 </div>
-
 
 
                 <p v-if="loading">Loading tasks...</p>
                 <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
 
-                <div v-if="currentSection === 'tasks'">
+                <div v-if="currentSection === 'tasks'" class="task-list">
                     <ul v-if="tasks.length > 0">
-                        <li v-for="task in tasks" :key="task.id">
-                            <span>{{ task.text }}</span> - <strong>{{ task.state }}</strong>
+                        <li v-for="task in tasks" :key="task.id" class="task-item">
+                            <span>{{ task.text }}</span> 
+                            <div class="task-controls">
+                            <select v-model="task.state" @change="updateTaskState(task)" class="task-state-select">
+                                <option v-for="state in taskStates" :key="state" :value="state">
+                                    {{ state.replace("_", " ") }}
+                                </option>
+                            </select>
+
+                            <button v-if="task.state === 'DONE'" @click="deleteTask(task.id)" class="task-delete">
+                                <i class="mdi mdi-trash-can-outline"></i>
+                            </button>
+                            </div>
+
                         </li>
                     </ul>
                     <p v-else>No tasks available.</p>
@@ -200,6 +245,38 @@ export default {
 
 <style scoped>
 
+.delete-task-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #e91ea5;
+    margin-left: 10px;
+}
+
+.delete-task-btn:hover {
+    color:#d81b80
+}
+
+.clear-completed-btn {
+    background-color: #e91ea5;
+    color: white;
+    font-weight: bold;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.clear-completed-btn:hover {
+    background-color:#d81b80
+}
+
 .dashboard-container {
     display: flex;
     height: 100vh;
@@ -212,6 +289,8 @@ export default {
     display: flex;
     flex-direction: column;
     background-color: #f4f4f4;
+    overflow-y: auto;
+    height: 100vh;
 }
 
 .header {
@@ -219,7 +298,7 @@ export default {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-    padding: 0 10px;
+    padding: 0 8px;
 }
 
 .tasks-title {
@@ -227,6 +306,11 @@ export default {
     font-weight: bold;
     color: #002241;
     margin: 0;
+}
+
+.task-list {
+    max-height: none; 
+    overflow-y: visible;
 }
 
 .add-task-button {
@@ -340,9 +424,92 @@ export default {
     background-color: #00172e;
 }
 
+.task-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.task-delete {
+    font-size: 18px;
+    cursor: pointer;
+    color: #e91ea5;
+    transition: color 0.3 ease-in-out;
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+}
+
+
+.task-delete:hover {
+    color: #d81b80;
+}
+
+.task-state-select {
+    padding: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #002241;
+    background-color: white;
+    border: 2px solid #e91ea5;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    width: auto;
+    min-width: 120px;
+    text-align: center;
+}
+
+.task-state-select:focus,
+.task-state-select:hover {
+    background-color: #e91ea5;
+    color: white;
+    border-color: #002241;
+}
+
+.task-state-select option {
+    background-color: white;  
+    color: #002241;  
+    font-weight: normal;
+}
+
+.task-state-select option:checked {
+    background-color: white !important;
+    color: black;
+}
+
+.task-state-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.task-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+
 .dashboard-content {
     flex-grow: 1;
-    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    height: calc(100vh - 80px);
+    padding-bottom: 20px;
+    margin-top: 20px;
 }
 
 h1 {
