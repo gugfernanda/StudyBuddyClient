@@ -18,6 +18,7 @@ export default {
             showAddTaskModal: false,
             newTaskText: "",
             newTaskState: "TO_DO",
+            newTaskDeadline: "",
             taskStates: ["TO_DO", "IN_PROGRESS", "DONE"],
         };
     },
@@ -34,12 +35,6 @@ export default {
                     return "";
             }
         },
-        // sortedTasks() {
-        //     return  [...this.tasks].sort((a, b) => {
-        //         const order = { "TO_DO": 1, "IN_PROGRESS": 2, "DONE": 3 };
-        //         return order[a.state] - order[b.state];
-        //     })
-        // }
 
         groupedTasks() {
             return {
@@ -56,6 +51,22 @@ export default {
             if(section === "tasks") {
                 this.fetchTasks();
             }
+        },
+
+        getUrgencyIcon(deadline) {
+            if(!deadline) return "mdi-calndar-remove";
+
+            const daysLeft = this.calculateDaysLeft(deadline);
+
+            if(daysLeft <= 1) return "mdi-alert-circle";
+            if(daysLeft <= 3) return "mdi-timer-sand";
+            return "mdi-calendar-clock"; 
+        },
+
+        calculateDaysLeft(deadline) {
+            const now = new Date();
+            const dueDate = new Date(deadline);
+            return Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
         },
 
         async fetchTasks() {
@@ -119,6 +130,7 @@ export default {
                     text: this.newTaskText,
                     state: this.newTaskState,
                     username: this.username,
+                    deadline: this.newTaskDeadline || null,
                 };
 
                 //console.log("Sending task:", newTask);
@@ -137,6 +149,7 @@ export default {
                 //console.log("Task added successfully:", this.tasks);
                 this.newTaskText = "";
                 this.newTaskState = "TO_DO";
+                this.newTaskDeadline = "";
                 this.showAddTaskModal = false;
             } catch(error) {
                 console.error("Error adding task:", error);
@@ -202,79 +215,36 @@ export default {
                 <p v-if="loading">Loading tasks...</p>
                 <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
 
-                <!-- <div v-if="currentSection === 'tasks'" class="task-list">
-                    <ul v-if="sortedTasks.length > 0">
-                        <li v-for="task in sortedTasks" :key="task.id" class="task-item">
-                            <span>{{ task.text }}</span> 
-                            <div class="task-controls">
-                            <select v-model="task.state" @change="updateTaskState(task)" class="task-state-select">
-                                <option v-for="state in taskStates" :key="state" :value="state">
-                                    {{ state.replace("_", " ") }}
-                                </option>
-                            </select>
-
-                            <button v-if="task.state === 'DONE'" @click="deleteTask(task.id)" class="task-delete">
-                                <i class="mdi mdi-trash-can-outline"></i>
-                            </button>
-                            </div>
-
-                        </li>
-                    </ul>
-                    <p v-else>No tasks available.</p>
-                </div> -->
-
                 <div v-if="currentSection === 'tasks'" class="task-list">
-    <div v-if="groupedTasks.TO_DO.length">
-        <h2 class="task-section-title">To Do</h2>
-        <ul>
-            <li v-for="task in groupedTasks.TO_DO" :key="task.id" class="task-item">
-                <span>{{ task.text }}</span> 
-                <div class="task-controls">
-                    <select v-model="task.state" @change="updateTaskState(task)" class="task-state-select">
-                        <option v-for="state in taskStates" :key="state" :value="state">
-                            {{ state.replace("_", " ") }}
-                        </option>
-                    </select>
-                </div>
-            </li>
-        </ul>
-    </div>
+                    <template v-for="(tasks, state) in groupedTasks" :key="state">
+                        <div v-if="tasks.length > 0">
+                        <h2 class="task-section-title"> {{ state.replace("_", " ") }}</h2>
+                        <ul>
+                            <li v-for="task in tasks" :key="task.id" class="task-item">
+                                <div class="task-info">
+                                    <span class="task-text">{{ task.text }}</span>
+                                    <!-- <span class="task-urgency">
+                                        <i :class="getUrgencyIcon(task.deadline)"></i>
+                                    </span> -->
+                                    <span class="task-deadline">
+                                        <i class="mdi mdi-calendar"></i> {{ task.deadline || "No Deadline" }}
+                                    </span>
+                                </div>
 
-    <div v-if="groupedTasks.IN_PROGRESS.length">
-        <h2 class="task-section-title">In Progress</h2>
-        <ul>
-            <li v-for="task in groupedTasks.IN_PROGRESS" :key="task.id" class="task-item">
-                <span>{{ task.text }}</span> 
-                <div class="task-controls">
-                    <select v-model="task.state" @change="updateTaskState(task)" class="task-state-select">
-                        <option v-for="state in taskStates" :key="state" :value="state">
-                            {{ state.replace("_", " ") }}
-                        </option>
-                    </select>
-                </div>
-            </li>
-        </ul>
-    </div>
-
-    <div v-if="groupedTasks.DONE.length">
-        <h2 class="task-section-title">Done</h2>
-        <ul>
-            <li v-for="task in groupedTasks.DONE" :key="task.id" class="task-item">
-                <span>{{ task.text }}</span> 
-                <div class="task-controls">
-                    <select v-model="task.state" @change="updateTaskState(task)" class="task-state-select">
-                        <option v-for="state in taskStates" :key="state" :value="state">
-                            {{ state.replace("_", " ") }}
-                        </option>
-                    </select>
-                    <button @click="deleteTask(task.id)" class="task-delete">
-                        <i class="mdi mdi-trash-can-outline"></i>
-                    </button>
-                </div>
-            </li>
-        </ul>
-    </div>
-</div>
+                                <div class="task-controls">
+                                    <select v-model="task.state" @change="updateTaskState(task)" class="task-state-select">
+                                        <option v-for="state in taskStates" :key="state" :value="state">
+                                            {{ state.replace("_", " ") }}
+                                        </option>
+                                    </select>
+                                    <button v-if="task.state === 'DONE'" @click="deleteTask(task.id)" class="task-delete">
+                                        <i class="mdi mdi-trash-can-outline"></i>
+                                    </button>
+                                </div>
+                            </li>
+                        </ul>
+                        </div>
+                    </template>
 
                 
 
@@ -290,13 +260,9 @@ export default {
                         <h2>Add New Task</h2>
                         <input v-model="newTaskText" type="text" placeholder="Enter task..." />
 
-                        <div class="task-state-container">
-                            <label for="taskState">Select Task State:</label>
-                            <select id="taskState" v-model="newTaskState">
-                                <option v-for="state in taskStates" :key="state" :value="state">
-                                    {{ state.replace("_", " ") }}
-                                </option>
-                            </select>
+                        <div class="deadline-container">
+                            <label for="taskDeadline" class="deadline-label">Enter deadline:</label>
+                            <input id="taskDeadline" v-model="newTaskDeadline" type="date" class="deadline-input" />
                         </div>
 
                         <div class="modal-buttons">
@@ -309,9 +275,61 @@ export default {
             </div>
         </div>
     </div>
+    </div>
 </template>
 
 <style scoped>
+
+.deadline-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.deadline-label {
+    font-size: 15px;
+    color: #555;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.deadline-input {
+    flex-grow: 1;
+    padding: 6px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+
+.task-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-grow: 1;
+}
+
+.task-deadline {
+    font-size: 14px;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    min-width: 120px;
+}
+
+/* .task-deadline i {
+    font-size: 16px;
+    color: #e91ea5; 
+} */
+
+.task-text {
+    font-size: 16px;
+    color: #333;
+    flex-grow: 1;
+}
 
 .delete-task-btn {
     background: none;
