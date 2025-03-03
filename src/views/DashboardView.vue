@@ -54,20 +54,19 @@ export default {
         },
 
         getUrgencyIcon(deadline) {
-            if(!deadline) return "mdi-calndar-remove";
+            if (!deadline) return; 
+            const deadlineDate = new Date(deadline);
+            const today = new Date();
+            const diffTime = deadlineDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
 
-            const daysLeft = this.calculateDaysLeft(deadline);
-
-            if(daysLeft <= 1) return "mdi-alert-circle";
-            if(daysLeft <= 3) return "mdi-timer-sand";
-            return "mdi-calendar-clock"; 
+            if (diffDays < 0) return "mdi-alert-circle";  
+            if (diffDays <= 1) return "mdi-alert-circle";  
+            if (diffDays <= 4) return "mdi-timer-sand"; 
+    
+            return "mdi-clock-outline";             
         },
 
-        calculateDaysLeft(deadline) {
-            const now = new Date();
-            const dueDate = new Date(deadline);
-            return Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
-        },
 
         async fetchTasks() {
             if(!this.username) {
@@ -223,9 +222,11 @@ export default {
                             <li v-for="task in tasks" :key="task.id" class="task-item">
                                 <div class="task-info">
                                     <span class="task-text">{{ task.text }}</span>
-                                    <!-- <span class="task-urgency">
-                                        <i :class="getUrgencyIcon(task.deadline)"></i>
-                                    </span> -->
+                                    <span class="task-urgency">
+                                        <i v-if="task.state !== 'DONE'" 
+                                        :class="`mdi ${getUrgencyIcon(task.deadline)}`"></i>
+                                        <!-- <span>{{ getUrgencyIcon(task.deadline) }}</span> -->
+                                    </span>
                                     <span class="task-deadline">
                                         <i class="mdi mdi-calendar"></i> {{ task.deadline || "No Deadline" }}
                                     </span>
@@ -279,6 +280,18 @@ export default {
 </template>
 
 <style scoped>
+
+.task-urgency i {
+    font-size: 18px;
+    margin-left: 8px;
+}
+
+.mdi-alert-circle { color: red; }  
+.mdi-timer-sand { color: orange; }   
+.mdi-clock-fast { color: goldenrod; }   
+.mdi-clock-outline { color: green; }    
+.mdi-calendar-clock {color: green;} 
+
 
 .deadline-container {
     display: flex;
