@@ -41,6 +41,9 @@ export default {
                 <li @click="changeSection('categories')" :class="{ active: currentSection === 'categories'}">
                     <span class="mdi mdi-folder"></span> Categories
                 </li>
+                <li @click="changeSection('pomodoro')" :class="{ active: currentSection === 'pomodoro'}">
+                    <span class="mdi mdi-timer"></span> Pomodoro Timer
+                </li>
                 <li class="logout" @click="logout">
                     <span class="mdi mdi-logout"></span> Logout
                 </li>

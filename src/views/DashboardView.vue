@@ -4,10 +4,11 @@ import SidebarDashboard from "../components/SidebarDashboard.vue";
 import NavBar from "../components/NavBar.vue";
 import TaskService from "../services/TaskService.js";
 import AuthService from "../services/AuthService.js";
+import PomodoroView from "../views/PomodoroView.vue";
 
 export default {
     name: "DashboardView",
-    components: { SidebarDashboard, NavBar },
+    components: { SidebarDashboard, NavBar, PomodoroView },
     data() {
         return {
             currentSection: "tasks",
@@ -50,6 +51,8 @@ export default {
             this.errorMessage = "";
             if(section === "tasks") {
                 this.fetchTasks();
+            } else if (section === "pomodoro") {
+                this.$router.push("/pomodoro"); 
             }
         },
 
@@ -238,6 +241,7 @@ export default {
                                             {{ state.replace("_", " ") }}
                                         </option>
                                     </select>
+
                                     <button v-if="task.state === 'DONE'" @click="deleteTask(task.id)" class="task-delete">
                                         <i class="mdi mdi-trash-can-outline"></i>
                                     </button>
@@ -255,6 +259,7 @@ export default {
                 <div v-if="currentSection === 'categories'">
                     <p>Here will be the categories...</p>
                 </div>
+
 
                 <div v-if="showAddTaskModal" class="modal-overlay">
                     <div class="modal">
