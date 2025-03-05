@@ -51,7 +51,7 @@ export default {
         },
 
         activeComponent() {
-            console.log("Recalculating activeComponent for:", this.currentSection);
+            //console.log("Recalculating activeComponent for:", this.currentSection);
             return this.currentSection;
         },
 
@@ -67,7 +67,7 @@ export default {
     
     methods: {
         changeSection(section) {
-            console.log("Changing section to:", section);
+            //console.log("Changing section to:", section);
             this.currentSection = section;
             this.errorMessage = "";
             if(section === "tasks") {

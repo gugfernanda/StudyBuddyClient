@@ -35,7 +35,7 @@ const AuthService = {
                 withCredentials: true
             });
 
-            console.log("Current user response:", response.data);
+            //console.log("Current user response:", response.data);
 
             return response.data;
 
