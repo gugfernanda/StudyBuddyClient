@@ -7,10 +7,18 @@ export default {
     methods: {
         changeSection(section) {
             this.$emit("sectionChanged", section);
+            if (section === "tasks") {
+                this.$emit("fetchTasks");
+            } 
+            
         },
         async handleTasksClick() {
             this.changeSection("tasks");
             this.$emit("fetchTasks");
+        },
+        async handleCalendarClick() {
+            this.changeSection("calendar");
+            //this.$emit("calendar");
         },
         async logout() {
             try {
@@ -43,6 +51,9 @@ export default {
                 </li>
                 <li @click="changeSection('pomodoro')" :class="{ active: currentSection === 'pomodoro'}">
                     <span class="mdi mdi-timer"></span> Pomodoro Timer
+                </li>
+                <li @click="changeSection('calendar')" :class="{ active: currentSection === 'calendar'}">
+                    <span class="mdi mdi-calendar-month"></span> Academic Calendar
                 </li>
                 <li class="logout" @click="logout">
                     <span class="mdi mdi-logout"></span> Logout

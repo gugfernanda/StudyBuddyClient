@@ -26,8 +26,12 @@ export default {
                 }
                 
             } catch (error) {
-                this.errorMessage = error.response ? error.response.data : "Login failed.";
-            }
+                if (error.response && error.response.data.error) {
+                    this.errorMessage = error.response.data.error; // Extrage doar mesajul de eroare
+                } else {
+                    this.errorMessage = "Login failed. Please try again.";
+                }           
+             }
         },
         togglePassword() {
             this.showPassword = !this.showPassword;

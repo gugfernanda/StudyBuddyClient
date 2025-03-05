@@ -5,10 +5,11 @@ import NavBar from "../components/NavBar.vue";
 import TaskService from "../services/TaskService.js";
 import AuthService from "../services/AuthService.js";
 import PomodoroView from "../views/PomodoroView.vue";
+import CalendarView from "../views/CalendarView.vue";
 
 export default {
     name: "DashboardView",
-    components: { SidebarDashboard, NavBar, PomodoroView },
+    components: { SidebarDashboard, NavBar, PomodoroView, CalendarView },
     data() {
         return {
             currentSection: "tasks",
@@ -21,6 +22,7 @@ export default {
             newTaskState: "TO_DO",
             newTaskDeadline: "",
             taskStates: ["TO_DO", "IN_PROGRESS", "DONE"],
+            //calendar: CalendarView,
         };
     },
     computed: {
@@ -32,10 +34,27 @@ export default {
                     return "Completed Tasks";
                 case "categories":
                     return "Task Categories";
+                case "calendar":
+                    return "Academic Calendar";
                 default:
                     return "";
             }
         },
+
+        componentMap() {
+            return {
+                tasks: "TaskList", // Dacă ai un component TaskList.vue, altfel rămâne cod static
+                completed: "CompletedTasks",
+                categories: "TaskCategories",
+                calendar: CalendarView,
+            };
+        },
+
+        activeComponent() {
+            console.log("Recalculating activeComponent for:", this.currentSection);
+            return this.currentSection;
+        },
+
 
         groupedTasks() {
             return {
@@ -45,15 +64,21 @@ export default {
             };
         }
     },
+    
     methods: {
         changeSection(section) {
+            console.log("Changing section to:", section);
             this.currentSection = section;
             this.errorMessage = "";
             if(section === "tasks") {
                 this.fetchTasks();
             } else if (section === "pomodoro") {
                 this.$router.push("/pomodoro"); 
-            }
+            } 
+            // else if (section === "calendar") {
+            //     this.currentSection = "calendar";
+            // }
+
         },
 
         getUrgencyIcon(deadline) {
@@ -195,6 +220,8 @@ export default {
 
 <template>
     <div class="dashboard-container">
+    
+
         <SidebarDashboard :currentSection="currentSection"
          @sectionChanged="changeSection"
          @fetchTasks="fetchTasks" 
@@ -205,7 +232,7 @@ export default {
             <div class="dashboard-content">
                 <div class="header">
                     <h1 class="tasks-title">{{ sectionTitle }}</h1>
-                    <div class="task-buttons">
+                    <div class="task-buttons" v-if="currentSection ==='tasks'">
                         <button class="add-task-button" @click="showAddTaskModal = true">+ Add Task</button>
                         <button class="clear-completed-btn" v-if="tasks.some(task => task.state === 'DONE')" @click="clearCompletedTasks">
                             <i class="mdi mdi-delete-sweep"></i> Clear Completed
@@ -217,7 +244,7 @@ export default {
                 <p v-if="loading">Loading tasks...</p>
                 <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
 
-                <div v-if="currentSection === 'tasks'" class="task-list">
+                                <div v-if="currentSection === 'tasks'" class="task-list">
                     <template v-for="(tasks, state) in groupedTasks" :key="state">
                         <div v-if="tasks.length > 0">
                         <h2 class="task-section-title"> {{ state.replace("_", " ") }}</h2>
@@ -228,7 +255,6 @@ export default {
                                     <span class="task-urgency">
                                         <i v-if="task.state !== 'DONE'" 
                                         :class="`mdi ${getUrgencyIcon(task.deadline)}`"></i>
-                                        <!-- <span>{{ getUrgencyIcon(task.deadline) }}</span> -->
                                     </span>
                                     <span class="task-deadline">
                                         <i class="mdi mdi-calendar"></i> {{ task.deadline || "No Deadline" }}
@@ -251,36 +277,38 @@ export default {
                         </div>
                     </template>
 
+                    
                 
 
-                <div v-if="currentSection === 'completed'">
-                    <p>Here will be the completed tasks...</p>
-                </div>
-                <div v-if="currentSection === 'categories'">
-                    <p>Here will be the categories...</p>
-                </div>
 
 
-                <div v-if="showAddTaskModal" class="modal-overlay">
-                    <div class="modal">
-                        <h2>Add New Task</h2>
-                        <input v-model="newTaskText" type="text" placeholder="Enter task..." />
+                    <div v-if="showAddTaskModal" class="modal-overlay">
+                        <div class="modal">
+                            <h2>Add New Task</h2>
+                            <input v-model="newTaskText" type="text" placeholder="Enter task..." />
 
-                        <div class="deadline-container">
-                            <label for="taskDeadline" class="deadline-label">Enter deadline:</label>
-                            <input id="taskDeadline" v-model="newTaskDeadline" type="date" class="deadline-input" />
-                        </div>
+                            <div class="deadline-container">
+                                <label for="taskDeadline" class="deadline-label">Enter deadline:</label>
+                                <input id="taskDeadline" v-model="newTaskDeadline" type="date" class="deadline-input" />
+                            </div>
 
-                        <div class="modal-buttons">
-                            <button class="save-button" @click="addTask">Save</button>
-                            <button class="cancel-button" @click="showAddTaskModal = false">Cancel</button>
+                            <div class="modal-buttons">
+                                <button class="save-button" @click="addTask">Save</button>
+                                <button class="cancel-button" @click="showAddTaskModal = false">Cancel</button>
+                            </div>
                         </div>
                     </div>
+                
+
                 </div>
 
+                <component :is="componentMap[currentSection]" />
+
+                
+
             </div>
+
         </div>
-    </div>
     </div>
 </template>
 
