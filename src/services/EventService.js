@@ -15,6 +15,7 @@ const EventService = {
 
     async createEvent(eventData) {
         try {
+            //console.log("Adding event");
             const response = await axios.post(`${API_URL}`, eventData, { withCredentials: true });
             return response.data;
         } catch (error) {
