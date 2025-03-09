@@ -138,7 +138,7 @@ export default {
 
             const formatDateTime = (date) => {
                 if (!date || date === "Unknown") return "";
-                const d = typeof date === "string" ? new Date(date) : date
+                const d = new Date(date);
                 if (isNaN(d.getTime())) return "";
                 return d.toISOString().slice(0, 16);
             };
@@ -153,6 +153,19 @@ export default {
 
             this.showEditModal = true;
             this.eventDetails.visible = false;
+        },
+
+        async handleDeleteEvent(eventId) {
+            if(!confirm("Are you sure you want to delete this event?")) return;
+
+            try {
+                await EventService.deleteEvent(eventId);
+                this.events = this.events.filter(event => event.id !== eventId);
+                this.calendarOptions.events = { ...this.calendarOptions, events: [...this.events] };
+                this.eventDetails.visible = false;
+            } catch(error) {
+                console.error("Error deleting event:", error);
+            }
         },
 
         async addEvent() {
@@ -178,11 +191,13 @@ export default {
                 const createdEvent = await EventService.createEvent(newEvent);
                 this.events.push({
                     title: createdEvent.title,
-                    startTime: createdEvent.startTime,
+                    start: new Date(createdEvent.startTime),
+                    end: new Date(createdEvent.endTime),
                     id: createdEvent.id,
+                    extendedProps: { description: createdEvent.description }
                 });
 
-                this.calendarOptions.events = [...this.events];
+                this.calendarOptions.events = {...this.calendarOptions, events: [...this.events]};
                 this.showModal = false;
                 this.newEventTitle = "";
             } catch(error) {
@@ -220,7 +235,7 @@ export default {
                         };
                     }
 
-                    this.calendarOptions.events = [...this.events];
+                    this.calendarOptions.events = {...this.calendarOptions, events: [...this.events]};
                     this.showEditModal = false;
                 } catch(error) {
                     console.error("Error updating event:", error);
@@ -239,7 +254,18 @@ export default {
 
     <div v-if="eventDetails.visible" class="modal-overlay">
         <div class="modal">
-            <h2>{{ eventDetails.title }}</h2>
+            <button class="delete-btn" @click="handleDeleteEvent(eventDetails.id)">
+                    <i class="mdi mdi-trash-can-outline"></i>
+            </button>
+            <div class="modal-header">
+                <h2 class="modal-title">{{ eventDetails.title }}</h2>
+                <!-- <button class="delete-btn" @click="handleDeleteEvent(eventDetails.id)">
+                    <i class="mdi mdi-trash-can-outline"></i>
+                </button> -->
+                
+            </div>
+                
+            
             <p><strong>Start:</strong> {{ eventDetails.start }}</p>
             <p><strong>End:</strong> {{ eventDetails.end }}</p>
             <p><strong>Description:</strong> {{ eventDetails.description }}</p>
@@ -315,21 +341,21 @@ export default {
 <style scoped>
 
 .edit-btn {
-    background: #002241;
-    color: white;
-}
-
-.edit-btn:hover {
-    background: #004080;
-}
-
-.close-btn {
     background: #e91ea5;
     color: white;
 }
 
-.close-btn:hover {
+.edit-btn:hover {
     background: #c2185b;
+}
+
+.close-btn {
+    background: #002241;
+    color: white;
+}
+
+.close-btn:hover {
+    background: #004080;
 }
 
 .calendar-container {
@@ -439,13 +465,6 @@ export default {
     z-index: 9999;
 }
 
-.modal {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    z-index: 10000;
-}
 
 .modal input, textarea {
     width: 100%;
@@ -528,6 +547,51 @@ button {
     font-size: 16px;
     border-radius: 5px;
     cursor: pointer;
+    text-align: center;
+}
+
+.modal {
+    position: relative;
+    background: white;
+    padding: 20px;
+    width: 350px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+
+
+.modal-header {
+    display: flex;
+    justify-content: center;
+    align-items:  center;
+    position: relative;
+    padding: 10px;
+    width: 100%;
+}
+
+.delete-btn {
+    position: absolute;
+    top: -10px;
+    /* right: 100px; */
+    left: 145px;
+    background: none;
+    border: none;
+    font-size: 23px;
+    cursor: pointer;
+    color: #d9534f;
+    transition: color 0.2s ease-in-out;
+    z-index: 10;
+}
+
+.delete-btn:hover {
+    color: #c9302c;
+}
+
+.modal-title {
+    font-size: 22px;
+    font-weight: bold;
+    flex-grow: 1;
     text-align: center;
 }
 
