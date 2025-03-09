@@ -43,6 +43,14 @@ export default {
             newEventEndDate:"",
             newEventEndTime:"",
             selectedDate: "",
+            showEditModal: false,
+            editedEvent: {
+                id: null,
+                title: "",
+                description: "",
+                startTime: "",
+                endTime: ""
+            },
             showModal: false,
         };
     },
@@ -107,7 +115,9 @@ export default {
         },
 
         handleEventClick(info) {
+            //console.log("Clicked event:", info.event);
             this.eventDetails = {
+                id: info.event.id || null,
                 title: info.event.title,
                 description: info.event.extendedProps?.description || "No description available",
                 start: info.event.start ? info.event.start.toLocaleString() : "Unknown",
@@ -115,6 +125,34 @@ export default {
                 visible: true
 
             };
+        },
+
+        openEditModal() {
+
+            if (!this.eventDetails.id) {
+                console.error("No event selected for editing.");
+                return;
+            }
+
+            //console.log("Editing event:", this.eventDetails);
+
+            const formatDateTime = (date) => {
+                if (!date || date === "Unknown") return "";
+                const d = typeof date === "string" ? new Date(date) : date
+                if (isNaN(d.getTime())) return "";
+                return d.toISOString().slice(0, 16);
+            };
+
+            this.editedEvent = {
+                id: this.eventDetails.id,
+                title: this.eventDetails.title || "",
+                description: this.eventDetails.description || "",
+                startTime: formatDateTime(this.eventDetails.start),
+                endTime: formatDateTime(this.eventDetails.end)
+            };
+
+            this.showEditModal = true;
+            this.eventDetails.visible = false;
         },
 
         async addEvent() {
@@ -151,6 +189,44 @@ export default {
                 console.error("Error adding event:", error);
             }
         },
+
+        async updateEvent() {
+            try {
+                if (!this.editedEvent.id) {
+                    console.error("No event ID found for update.");
+                    return;
+                }
+
+                const updatedEvent = await EventService.updateEvent(this.editedEvent.id, {
+                    title: this.editedEvent.title,
+                    description: this.editedEvent.description,
+                    startTime: this.editedEvent.startTime,
+                    endTime: this.editedEvent.endTime
+                });
+
+                if (!updatedEvent || !updatedEvent.id) {
+                    console.error("Update failed, no event data received.");
+                    return;
+                }
+
+                const index = this.events.findIndex(event =>event.id === updatedEvent.id);
+                if(index !== -1) {
+                    this.events[index] = {
+                            ...this.events[index],
+                            title: updatedEvent.title,
+                            start: updatedEvent.startTime,
+                            end: updatedEvent.endTime,
+                            extendedProps: { description: updatedEvent.description }
+                        };
+                    }
+
+                    this.calendarOptions.events = [...this.events];
+                    this.showEditModal = false;
+                } catch(error) {
+                    console.error("Error updating event:", error);
+                }
+        
+        },
     },
 };
 </script>
@@ -167,9 +243,41 @@ export default {
             <p><strong>Start:</strong> {{ eventDetails.start }}</p>
             <p><strong>End:</strong> {{ eventDetails.end }}</p>
             <p><strong>Description:</strong> {{ eventDetails.description }}</p>
-            <button @click="eventDetails.visible = false">Close</button>
+            <div class="button-container">
+                <button class="edit-btn" @click="openEditModal">Edit</button>
+                <button class="close-btn" @click="eventDetails.visible = false">Close</button>
+            </div>
+
+
         </div>
     </div>
+
+    <div v-if="showEditModal" class="modal-overlay">
+        <div class="modal">
+            <h2>Edit Event</h2>
+
+            <input v-model="editedEvent.title" type="text" placeholder="Event Title" />
+            <textarea v-model="editedEvent.description" placeholder="Event Description"></textarea>
+
+            <div class="time-picker">
+                <label for="edit-start">Starts</label>
+                <div class="date-time-container">
+                    <input type="datetime-local" id="edit-start" v-model="editedEvent.startTime" />
+                </div>
+            </div>
+
+            <div class="time-picker">
+                <label for="edit-end">Ends</label>
+                <div class="date-time-container">
+                    <input type="datetime-local" id="edit-end" v-model="editedEvent.endTime" />
+                </div>
+            </div>
+
+            <button class="save-btn" @click="updateEvent">Save Changes</button>
+            <button class="cancel-btn" @click="showEditModal = false">Cancel</button>
+        </div>
+    </div>
+
 
 
     <div v-if="showModal" class="modal-overlay">
@@ -206,12 +314,117 @@ export default {
 
 <style scoped>
 
+.edit-btn {
+    background: #002241;
+    color: white;
+}
+
+.edit-btn:hover {
+    background: #004080;
+}
+
+.close-btn {
+    background: #e91ea5;
+    color: white;
+}
+
+.close-btn:hover {
+    background: #c2185b;
+}
+
 .calendar-container {
     padding: 20px;
     background: white;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
+
+:deep(.fc-daygrid-day-number) {
+    color: #002241 !important;
+    font-weight: bold;
+}
+
+:deep(.fc-col-header-cell a) {
+    color: #002241 !important;
+    font-weight: bold;
+}
+
+:deep(.fc-col-header-cell:first-child a), 
+:deep(.fc-col-header-cell:last-child a) { 
+    color: #e91ea5 !important;
+}
+
+
+:deep(.fc-day-today) {
+    background-color: #d3e9fc !important; 
+    border: 2px solid #002241 !important; 
+}
+
+
+:deep(.fc-event) {
+    background-color: #e91ea5 !important;
+    border-color: #e91ea5 !important;
+    color: white !important;
+    border-radius: 5px;
+    padding: 3px;
+}
+
+
+:deep(.fc-daygrid-event-dot) {
+    background-color: #ffcc00 !important; 
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+    border:#ffcc00;
+}
+
+
+:deep(.fc-button.fc-today-button) {
+    background-color: #e91ea5 !important; 
+    color: white !important; 
+    border-radius: 8px !important; 
+    padding: 6px 12px !important;
+    font-weight: bold !important;
+    border: none !important;
+}
+
+:deep(.fc-button.fc-today-button:hover) {
+    background-color: #c2185b !important; 
+}
+
+
+:deep(.fc-button.fc-prev-button), 
+:deep(.fc-button.fc-next-button) {
+    background-color: #002241 !important;
+    color: white !important;
+    border-radius: 50% !important;
+    width: 40px !important;
+    height: 40px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none !important;
+    font-size: 18px !important; 
+    transition: all 0.2s ease-in-out;
+}
+
+:deep(.fc-button-group) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; 
+    margin-top: 5px; 
+}
+
+:deep(.fc-button.fc-prev-button:hover), 
+:deep(.fc-button.fc-next-button:hover) {
+    background-color: #004080 !important;
+    transform: scale(1.1);
+}
+
+
 
 .modal-overlay {
     position: fixed;
@@ -234,7 +447,7 @@ export default {
     z-index: 10000;
 }
 
-.modal input {
+.modal input, textarea {
     width: 100%;
     padding: 8px;
     margin: 10px 0;
@@ -250,7 +463,6 @@ export default {
     width: 100%;
 }
 
-
 .time-picker label {
     width: 80px; 
     font-weight: bold;
@@ -263,26 +475,13 @@ export default {
     flex: 1;
 }
 
-.date-time-container label {
-    width: 60px;
-    font-weight: bold;
-}
-
-.date-time-container input{
+.date-time-container input {
     flex: 1;
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 5px;
 }
 
-textarea {
-    width: 100%;
-    padding: 8px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    resize: none;
-}
 
 .save-btn {
     background: #e91ea5;
@@ -306,6 +505,7 @@ textarea {
     cursor: pointer;
 }
 
+
 button {
     margin: 5px;
     padding: 10px;
@@ -314,15 +514,21 @@ button {
     cursor: pointer;
 }
 
-
-button:first-of-type {
-    background: #e91ea5;
-    color: white;
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 10px;
 }
 
-button:last-of-type {
-    background: #002241;
-    color: white;
+.button-container button {
+    flex: 1;
+    max-width: 150px;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
 }
 
 </style>
