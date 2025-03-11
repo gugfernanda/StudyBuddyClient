@@ -75,6 +75,12 @@ export default {
                     <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
 
                 </form>
+
+                <p class="forgot-password">
+                    <router-link to="/forgot-password">Forgot Password?</router-link>
+                </p>
+
+
                 <p class="signup-text">
                     Don't have an account?
                     <router-link to="/signup" class="signup-link">Sign up</router-link>
@@ -89,6 +95,21 @@ export default {
 
 
 <style scoped>
+
+.forgot-password {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.forgot-password a {
+    color: #e91ea5;
+    text-decoration: none;
+}
+
+.forgot-password a:hover {
+    text-decoration: underline;
+}
+
 
 * {
     margin: 0;

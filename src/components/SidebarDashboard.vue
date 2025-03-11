@@ -43,12 +43,12 @@ export default {
                 <li @click="handleTasksClick" :class="{ active: currentSection === 'tasks' }">
                     <span class="mdi mdi-format-list-bulleted"></span> My Tasks
                 </li>
-                <li @click="changeSection('completed')" :class="{ active: currentSection === 'completed' }">
+                <!-- <li @click="changeSection('completed')" :class="{ active: currentSection === 'completed' }">
                     <span class="mdi mdi-check-circle"></span> Completed
                 </li>
                 <li @click="changeSection('categories')" :class="{ active: currentSection === 'categories'}">
                     <span class="mdi mdi-folder"></span> Categories
-                </li>
+                </li> -->
                 <li @click="changeSection('pomodoro')" :class="{ active: currentSection === 'pomodoro'}">
                     <span class="mdi mdi-timer"></span> Pomodoro Timer
                 </li>

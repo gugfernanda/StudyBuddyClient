@@ -74,7 +74,26 @@ const AuthService = {
             console.error("Logout error:", error.response ? error.response.data : error.message);
             throw error;
         }
+    },
+    async forgotPassword(email) {
+        try {
+            const response = await axios.post(`${API_URL}/forgot-password`, { email });
+            return response.data;
+        } catch (error) {
+            console.error("Forgot password error:", error.response ? error.response.data : error.message);
+            throw error;
+        }
+    },
+    async resetPassword(token, password) {
+        try {
+            const response = await axios.post(`${API_URL}/reset-password`, { token, password });
+            return response.data;
+        } catch(error) {
+            console.error("Reset password error:", error.response ? error.response.data : error.message);
+            throw error;
+        }
     }
+
 };
 
 export default AuthService;
