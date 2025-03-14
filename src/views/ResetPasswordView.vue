@@ -4,17 +4,19 @@ import AuthService from '../services/AuthService';
 export default {
     data() {
         return {
+            email: "",
             password: "",
             confirmPassword: "",
             message: "",
             isError: false,
             loading: false,
-            token: ""
+            showPassword: false,
+            showConfirmPassword: false
         };
     },
     created() {
         const urlParams = new URLSearchParams(window.location.search);
-        this.token = urlParams.get("token");
+        this.email = urlParams.get("email");
     },
     methods: {
         async resetPassword() {
@@ -30,13 +32,20 @@ export default {
             }
 
             try {
-                const response = await AuthService.resetPassword(this.token, this.password);
+                const response = await AuthService.resetPassword(this.email, this.password);
                 this.message = response.message;
             } catch(error) {
                 this.message = "Error reseting password. Please try again.";
                 this.isError = true;
             } finally {
                 this.loading = false;
+            }
+        },
+        togglePassword(field) { 
+            if (field === 'password') {
+                this.showPassword = !this.showPassword;
+            } else if (field === 'confirmPassword') {
+                this.showConfirmPassword = !this.showConfirmPassword;
             }
         }
     }
@@ -50,18 +59,30 @@ export default {
             <p>Please enter your new password below.</p>
 
             <form @submit.prevent="resetPassword">
-                <input
-                    type="password"
-                    v-model="password"
-                    placeholder="New Password"
-                    required
-                />
-                <input
-                    type="password"
-                    v-model="confirmPassword"
-                    placeholder="Confirm New Password"
-                    required
-                />
+                <div class="password-container">
+                    <input
+                        :type="showPassword ? 'text' : 'password'"
+                        v-model="password"
+                        placeholder="New Password"
+                        required
+                    />
+                    <span class="toggle-password" @click="togglePassword('password')">
+                        <span :class="showPassword ? 'mdi mdi-eye-off' : 'mdi mdi-eye'"></span>
+                    </span>
+                </div>
+
+
+                <div class="password-container">
+                    <input
+                        :type="showConfirmPassword ? 'text' : 'password'"
+                        v-model="confirmPassword"
+                        placeholder="Confirm New Password"
+                        required
+                    />
+                    <span class="toggle-password" @click="togglePassword('confirmPassword')">
+                        <span :class="showConfirmPassword ? 'mdi mdi-eye-off' : 'mdi mdi-eye'"></span>
+                    </span>
+                </div>
 
                 <button type="submit" :disabled="loading">
                     {{ loading ? "Reseting..." : "Reset Password" }}
@@ -161,5 +182,33 @@ button:hover:not(:disabled) {
 
 .back-link:hover {
     text-decoration: underline;
+}
+
+.password-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.password-container input {
+    width: 100%;
+    padding: 10px;
+    padding-right: 40px; 
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    font-size: 20px;
+    color: #888;
+}
+
+.toggle-password:hover {
+    color: #555;
 }
 </style>

@@ -84,9 +84,18 @@ const AuthService = {
             throw error;
         }
     },
-    async resetPassword(token, password) {
+    async verifyCode(email, code) {
         try {
-            const response = await axios.post(`${API_URL}/reset-password`, { token, password });
+            const response = await axios.post(`${API_URL}/verify-code`, { email, code });
+            return response.data;
+        } catch(error) {
+            console.error("Verify code error:", error.response ? error.response.data : error.message);
+            throw error;
+        }
+    },
+    async resetPassword(email, newPassword) {
+        try {
+            const response = await axios.post(`${API_URL}/reset-password`, { email, newPassword });
             return response.data;
         } catch(error) {
             console.error("Reset password error:", error.response ? error.response.data : error.message);

@@ -5,9 +5,11 @@ export default {
     data() {
         return {
             email: "",
+            code: "",
             message: "",
             isError: false,
-            loading: false
+            loading: false,
+            step: 1
         };
     },
 
@@ -20,8 +22,26 @@ export default {
             try {
                 const response = await AuthService.forgotPassword(this.email);
                 this.message = response.message;
+                this.step = 2;
             } catch(error) {
                 this.message = "Error sending reset link. Please try again.";
+                this.isError = true;
+            } finally {
+                this.loading = false;
+            }
+        },
+        async verifyCode() {
+            this.loading = true;
+            this.message = "";
+            this.isError = false;
+
+            try {
+                const response = await AuthService.verifyCode(this.email, this.code);
+                this.message = response.message;
+
+                this.$router.push({ path: "/reset-password", query: { email: this.email } });
+            } catch(error) {
+                this.message = "Invalid code. Please try again."
                 this.isError = true;
             } finally {
                 this.loading = false;
@@ -34,28 +54,39 @@ export default {
 <template>
     <div class="forgot-password-page">
         <div class="forgot-password-container">
-            <h2>Forgot Password</h2>
-            <p>Enter your email adress below, and we'll send you a link to reset your password.</p>
+            <h2 v-if="step === 1">Forgot Password</h2>
+            <h2 v-if="step === 2">Enter Verification Code</h2>
 
-            <form @submit.prevent="requestReset">
-                <input
-                    type="email"
-                    v-model="email"
-                    placeholder="Enter your email"
-                    required
-                />
+            <p v-if="step === 1">
+                Enter your email address below, and we'll send you a 6-digit verification code.
+            </p>
+            <p v-if="step === 2">
+                A 6-digit code has been sent to <b>{{ email }}</b>. Enter it below to reset your password.
+            </p>
+
+            <!-- ✅ Formular pentru trimiterea codului -->
+            <form v-if="step === 1" @submit.prevent="requestReset">
+                <input type="email" v-model="email" placeholder="Enter your email" required />
 
                 <button type="submit" :disabled="loading">
-                    {{ loading ? "Sending..." : "Send Reset Link" }}
+                    {{ loading ? "Sending..." : "Send Verification Code" }}
                 </button>
             </form>
 
-            <p v-if="messgae" :class="isError ? 'error-message' : 'success-message'">
+            <!-- ✅ Formular pentru introducerea codului -->
+            <form v-if="step === 2" @submit.prevent="verifyCode">
+                <input type="text" v-model="code" placeholder="Enter verification code" required />
+
+                <button type="submit" :disabled="loading">
+                    {{ loading ? "Verifying..." : "Verify Code" }}
+                </button>
+            </form>
+
+            <p v-if="message" :class="isError ? 'error-message' : 'success-message'">
                 {{ message }}
             </p>
 
             <router-link to="/" class="back-link">Back to Login</router-link>
-
         </div>
     </div>
 </template>
@@ -137,7 +168,7 @@ button:hover:not(:disabled) {
     display: block;
     margin-top: 15px;
     font-size: 14px;
-    color: #e91ea5;
+    color: #002241;
     text-decoration: none;
 }
 
