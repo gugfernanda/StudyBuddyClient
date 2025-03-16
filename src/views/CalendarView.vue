@@ -136,11 +136,37 @@ export default {
 
             //console.log("Editing event:", this.eventDetails);
 
-            const formatDateTime = (date) => {
-                if (!date || date === "Unknown") return "";
-                const d = new Date(date);
-                if (isNaN(d.getTime())) return "";
-                return d.toISOString().slice(0, 16);
+            const formatDateTime = (dateString) => {
+                //console.log("Original date value:", dateString); 
+
+                if (!dateString || dateString === "Unknown" || dateString === undefined) return "";
+
+                try {
+                    const dateParts = dateString.split(", ")[0].split("/"); 
+                    const timePart = dateString.split(", ")[1];
+
+                    if (dateParts.length !== 3 || !timePart) {
+                        console.error("Invalid date format:", dateString);
+                        return "";
+                    }
+
+                    const formattedDateString = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}T${timePart}`;
+
+                    //console.log("Formatted date string:", formattedDateString);
+
+                    const d = new Date(formattedDateString);
+
+                    if (isNaN(d.getTime())) {
+                        console.error("Invalid date:", formattedDateString);
+                        return "";
+                    }
+                    const localDate = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+                    
+                    return localDate.toISOString().slice(0, 16);
+                } catch (error) {
+                    console.error("Error formatting date:", error);
+                    return "";
+                }
             };
 
             this.editedEvent = {
@@ -150,6 +176,8 @@ export default {
                 startTime: formatDateTime(this.eventDetails.start),
                 endTime: formatDateTime(this.eventDetails.end)
             };
+
+            //console.log("Formatted event:", this.editedEvent);
 
             this.showEditModal = true;
             this.eventDetails.visible = false;
@@ -200,6 +228,7 @@ export default {
                 this.calendarOptions.events = {...this.calendarOptions, events: [...this.events]};
                 this.showModal = false;
                 this.newEventTitle = "";
+                this.newEventDescription = "";
             } catch(error) {
                 console.error("Error adding event:", error);
             }
