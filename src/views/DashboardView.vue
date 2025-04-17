@@ -36,13 +36,13 @@ export default {
         sectionTitle() {
             switch (this.currentSection) {
                 case "tasks":
-                    return "My Tasks";
+                    return this.t.myTasks;
                 case "completed":
-                    return "Completed Tasks";
+                    return this.t.completedTasks;
                 case "categories":
-                    return "Task Categories";
+                    return this.t.taskCategories;
                 case "calendar":
-                    return "Academic Calendar";
+                    return this.t.academicCalendar;
                 default:
                     return "";
             }
@@ -238,23 +238,23 @@ export default {
             <NavBar />
             <div class="dashboard-content">
                 <div class="header">
-                    <h1 class="tasks-title">{{ sectionTitle }}</h1>
+                    <h1 class="tasks-title">{{ t.myTasks }}</h1>
                     <div class="task-buttons" v-if="currentSection ==='tasks'">
-                        <button class="add-task-button" @click="showAddTaskModal = true">+ Add Task</button>
+                        <button class="add-task-button" @click="showAddTaskModal = true">{{ t.addTask }}</button>
                         <button class="clear-completed-btn" v-if="tasks.some(task => task.state === 'DONE')" @click="clearCompletedTasks">
-                            <i class="mdi mdi-delete-sweep"></i> Clear Completed
+                            <i class="mdi mdi-delete-sweep"></i> {{ t.clearCompleted }}
                         </button>
                     </div>
                 </div>
 
 
-                <p v-if="loading">Loading tasks...</p>
+                <p v-if="loading">{{ t.loadingTasks }}</p>
                 <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
 
-                                <div v-if="currentSection === 'tasks'" class="task-list">
-                    <template v-for="(tasks, state) in groupedTasks" :key="state">
+                    <div v-if="currentSection === 'tasks'" class="task-list">
+                        <template v-for="(tasks, state) in groupedTasks" :key="state">
                         <div v-if="tasks.length > 0">
-                        <h2 class="task-section-title"> {{ state.replace("_", " ") }}</h2>
+                        <h2 class="task-section-title"> {{ t.taskStatesDisplay[state] || state.replace("_", " ") }}</h2>
                         <ul>
                             <li v-for="task in tasks" :key="task.id" class="task-item">
                                 <div class="task-info">
@@ -264,14 +264,14 @@ export default {
                                         :class="`mdi ${getUrgencyIcon(task.deadline)}`"></i>
                                     </span>
                                     <span class="task-deadline">
-                                        <i class="mdi mdi-calendar"></i> {{ task.deadline || "No Deadline" }}
+                                        <i class="mdi mdi-calendar"></i> {{ task.deadline || t.noDeadline }}
                                     </span>
                                 </div>
 
                                 <div class="task-controls">
                                     <select v-model="task.state" @change="updateTaskState(task)" class="task-state-select">
-                                        <option v-for="state in taskStates" :key="state" :value="state">
-                                            {{ state.replace("_", " ") }}
+                                        <option v-for="stateOption in taskStates" :key="stateOption" :value="stateOption">
+                                            {{ t.taskStatesDisplay[stateOption] || stateOption.replace("_", " ") }}
                                         </option>
                                     </select>
 
@@ -291,17 +291,17 @@ export default {
 
                     <div v-if="showAddTaskModal" class="modal-overlay">
                         <div class="modal">
-                            <h2>Add New Task</h2>
-                            <input v-model="newTaskText" type="text" placeholder="Enter task..." />
+                            <h2>{{ t.addTask }}</h2>
+                            <input v-model="newTaskText" type="text" :placeholder="t.enterTask" />
 
                             <div class="deadline-container">
-                                <label for="taskDeadline" class="deadline-label">Enter deadline:</label>
+                                <label for="taskDeadline" class="deadline-label">{{ t.enterDeadline }}</label>
                                 <input id="taskDeadline" v-model="newTaskDeadline" type="date" class="deadline-input" />
                             </div>
 
                             <div class="modal-buttons">
-                                <button class="save-button" @click="addTask">Save</button>
-                                <button class="cancel-button" @click="showAddTaskModal = false">Cancel</button>
+                                <button class="save-button" @click="addTask">{{ t.save }}</button>
+                                <button class="cancel-button" @click="showAddTaskModal = false">{{ t.cancel }}</button>
                             </div>
                         </div>
                     </div>

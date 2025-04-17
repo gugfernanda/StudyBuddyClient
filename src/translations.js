@@ -47,6 +47,11 @@ export const translations = {
         enterDeadline: "Enter deadline:",
         save: "Save",
         cancel: "Cancel",
+        taskStatesDisplay: {
+            TO_DO: "TO DO",
+            IN_PROGRESS: "IN PROGRESS",
+            DONE: "DONE",
+          },          
     },
     ro: {
         login: "Autentificare",
@@ -90,11 +95,16 @@ export const translations = {
         addTask: "+ Adaugă sarcină",
         clearCompleted: "Șterge finalizate",
         loadingTasks: "Se încarcă sarcinile...",
-        noDeadline: "Fără termen limită",
+        noDeadline: "Fără termen limită ",
         enterTask: "Introdu sarcina...",
         enterDeadline: "Introdu termenul limită:",
         save: "Salvează",
         cancel: "Renunță",
+        taskStatesDisplay: {
+            TO_DO: "De făcut",
+            IN_PROGRESS: "În progres",
+            DONE: "Finalizat",
+          },          
     },
   };
   
