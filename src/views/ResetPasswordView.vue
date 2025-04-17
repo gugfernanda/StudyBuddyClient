@@ -1,5 +1,9 @@
 <script>
 import AuthService from '../services/AuthService';
+import { translations } from "../translations.js";
+import { useLanguage } from "../language.js";
+
+
 
 export default {
     data() {
@@ -18,14 +22,22 @@ export default {
         const urlParams = new URLSearchParams(window.location.search);
         this.email = urlParams.get("email");
     },
+    computed: {
+        lang() {
+            return useLanguage().lang.value;
+        },
+        t() {
+            return translations[this.lang];
+        }
+    },
     methods: {
         async resetPassword() {
-            this.loding = true;
+            this.loading = true;
             this.message = "";
             this.isError = false;
 
             if(this.password !== this.confirmPassword) {
-                this.message = "Passwords do not match!";
+                this.message = this.t.passwordsDontMatch;
                 this.isError = true;
                 this.loading = false;
                 return;
@@ -35,7 +47,7 @@ export default {
                 const response = await AuthService.resetPassword(this.email, this.password);
                 this.message = response.message;
             } catch(error) {
-                this.message = "Error reseting password. Please try again.";
+                this.message = this.t.resetPasswordError;
                 this.isError = true;
             } finally {
                 this.loading = false;
@@ -55,15 +67,15 @@ export default {
 <template>
     <div class="reset-password-page">
         <div class="reset-password-container">
-            <h2>Reset Password</h2>
-            <p>Please enter your new password below.</p>
+            <h2>{{ t.resetPasswordTitle }}</h2>
+            <p>{{ t.resetPasswordInstruction }}</p>
 
             <form @submit.prevent="resetPassword">
                 <div class="password-container">
                     <input
                         :type="showPassword ? 'text' : 'password'"
                         v-model="password"
-                        placeholder="New Password"
+                        :placeholder="t.newPassword"
                         required
                     />
                     <span class="toggle-password" @click="togglePassword('password')">
@@ -76,7 +88,7 @@ export default {
                     <input
                         :type="showConfirmPassword ? 'text' : 'password'"
                         v-model="confirmPassword"
-                        placeholder="Confirm New Password"
+                        :placeholder="t.confirmNewPassword"
                         required
                     />
                     <span class="toggle-password" @click="togglePassword('confirmPassword')">
@@ -85,7 +97,7 @@ export default {
                 </div>
 
                 <button type="submit" :disabled="loading">
-                    {{ loading ? "Reseting..." : "Reset Password" }}
+                    {{ loading ? t.resetting : t.resetPasswordBtn }}
                 </button>
 
             </form>
@@ -94,7 +106,7 @@ export default {
                     {{  message }}
             </p>
 
-            <router-link to="/" class="back-link">Back to Login</router-link>
+            <router-link to="/" class="back-link">{{ t.backToLogin }}</router-link>
 
         </div>
     </div>

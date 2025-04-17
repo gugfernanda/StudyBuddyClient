@@ -336,11 +336,13 @@ export default {
 .deadline-container {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 10px;
     margin-top: 5px;
 }
 
 .deadline-label {
+    /*flex-shrink: 0;*/
+    width: 150px;
     font-size: 15px;
     color: #555;
     font-weight: 500;
@@ -370,7 +372,7 @@ export default {
     align-items: center;
     gap: 5px;
     white-space: nowrap;
-    min-width: 120px;
+    min-width: 145px;
 }
 
 /* .task-deadline i {

@@ -1,5 +1,7 @@
 <script>
 import AuthService from '../services/AuthService.js';
+import { translations } from "../translations.js";
+import { useLanguage } from "../language.js";
 
 export default {
     data() {
@@ -13,6 +15,15 @@ export default {
         };
     },
 
+    computed: {
+        lang() {
+            return useLanguage().lang.value;
+        },
+        t() {
+            return translations[this.lang];
+        }
+    },
+
     methods: {
         async requestReset() {
             this.loading = true;
@@ -21,10 +32,10 @@ export default {
 
             try {
                 const response = await AuthService.forgotPassword(this.email);
-                this.message = response.message;
+                this.message = this.t.verificationCodeSent;
                 this.step = 2;
             } catch(error) {
-                this.message = "Error sending reset link. Please try again.";
+                this.message = this.t.errorSendResetLink;
                 this.isError = true;
             } finally {
                 this.loading = false;
@@ -37,11 +48,11 @@ export default {
 
             try {
                 const response = await AuthService.verifyCode(this.email, this.code);
-                this.message = response.message;
+                this.message = this.t.verificationCodeSent;
 
                 this.$router.push({ path: "/reset-password", query: { email: this.email } });
             } catch(error) {
-                this.message = "Invalid code. Please try again."
+                this.message = this.t.invalidCodeError;
                 this.isError = true;
             } finally {
                 this.loading = false;
@@ -54,31 +65,29 @@ export default {
 <template>
     <div class="forgot-password-page">
         <div class="forgot-password-container">
-            <h2 v-if="step === 1">Forgot Password</h2>
-            <h2 v-if="step === 2">Enter Verification Code</h2>
+            <h2 v-if="step === 1">{{ t.forgotPasswordTitle }}</h2>
+            <h2 v-if="step === 2">{{ t.enterVerificationTitle }}</h2>
 
             <p v-if="step === 1">
-                Enter your email address below, and we'll send you a 6-digit verification code.
+                {{ t.forgotPasswordInstruction }}
             </p>
             <p v-if="step === 2">
-                A 6-digit code has been sent to <b>{{ email }}</b>. Enter it below to reset your password.
+                {{ t.codeSentInstruction }} <b>{{ email }}</b>. {{ t.resetPasswordFollowup }}
             </p>
 
-            <!-- ✅ Formular pentru trimiterea codului -->
             <form v-if="step === 1" @submit.prevent="requestReset">
-                <input type="email" v-model="email" placeholder="Enter your email" required />
+                <input type="email" v-model="email" :placeholder="t.enterYourEmail" required />
 
                 <button type="submit" :disabled="loading">
-                    {{ loading ? "Sending..." : "Send Verification Code" }}
+                    {{ loading ? t.sending : t.sendVerification }}
                 </button>
             </form>
 
-            <!-- ✅ Formular pentru introducerea codului -->
             <form v-if="step === 2" @submit.prevent="verifyCode">
-                <input type="text" v-model="code" placeholder="Enter verification code" required />
+                <input type="text" v-model="code" :placeholder="t.enterCode" required />
 
                 <button type="submit" :disabled="loading">
-                    {{ loading ? "Verifying..." : "Verify Code" }}
+                    {{ loading ? t.verifying : t.verify }}
                 </button>
             </form>
 
@@ -86,7 +95,7 @@ export default {
                 {{ message }}
             </p>
 
-            <router-link to="/" class="back-link">Back to Login</router-link>
+            <router-link to="/" class="back-link">{{ t.backToLogin }}</router-link>
         </div>
     </div>
 </template>
