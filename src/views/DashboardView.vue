@@ -6,6 +6,10 @@ import TaskService from "../services/TaskService.js";
 import AuthService from "../services/AuthService.js";
 import PomodoroView from "../views/PomodoroView.vue";
 import CalendarView from "../views/CalendarView.vue";
+import { translations } from "../translations.js";
+import { useLanguage } from "../language.js";
+
+const { lang } = useLanguage();
 
 export default {
     name: "DashboardView",
@@ -26,6 +30,9 @@ export default {
         };
     },
     computed: {
+        t() {
+            return translations[lang.value];
+        },
         sectionTitle() {
             switch (this.currentSection) {
                 case "tasks":
@@ -101,7 +108,7 @@ export default {
 
                 console.error("Cannot fetch tasks - username is missing");
 
-                this.errorMessage = "User not found.";
+                this.errorMessage = this.t.userNotFound;
                 console.error("User is missing, cannot fetch tasks.");
                 return;
             }
@@ -111,7 +118,7 @@ export default {
                 this.tasks = tasks;
                 this.errorMessage = "";
             } catch (error) {
-                this.errorMessage = "Failed to load tasks. Please try again.";
+                this.errorMessage = this.t.errorLoadTasks;
                 console.error("Error fetching tasks:", error);
             } finally {
                 this.loading = false;
@@ -122,7 +129,7 @@ export default {
             try {
                 await TaskService.updateTaskState(task.id, task.state);
             } catch (error) {
-                alert("Failed to update task. Please try again.");
+                alert(this.t.errorUpdateTask);
             }
         },
 
@@ -132,7 +139,7 @@ export default {
                 this.tasks = this.tasks.filter(task => task.id !== taskId);
             } catch (error) {
                 console.error("Error deleting task:", error);
-                alert("Failed to delete task. Please try again.");
+                alert(this.t.errorDeleteTask);
             }
         },
 
@@ -142,13 +149,13 @@ export default {
                 this.tasks = this.tasks.filter(task => task.state !== "DONE");
             } catch (error) {
                 console.error("Error clearing completed tasks:", error);
-                alert("Failed to clear completed tasks.");
+                alert(this.t.errorClearTasks);
             }
         },
 
         async addTask() {
             if(!this.newTaskText.trim()) {
-                alert("Task text cannot be empty!");
+                alert(this.t.emptyTaskText);
                 return;
             }
 
@@ -180,7 +187,7 @@ export default {
                 this.showAddTaskModal = false;
             } catch(error) {
                 console.error("Error adding task:", error);
-                alert("Failed to add task. Please try again.");
+                alert(this.t.errorAddTask);
             }
         }
     },
@@ -205,10 +212,10 @@ export default {
                 } else {
 
                     console.warn("User not logged in, cannot fetch tasks");
-                    this.errorMessage = "User not logged in.";
+                    this.errorMessage = this.t.notLoggedIn;
                 }
             } catch (error) {
-                this.errorMessage = "Error retrieving user data.";
+                this.errorMessage = this.t.errorRetrieveUser;
                 console.error(error);
             }
         }

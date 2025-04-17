@@ -1,6 +1,10 @@
 <script>
 
 import AuthService from "../services/AuthService.js";
+import { translations } from "../translations.js";
+import { useLanguage } from "../language.js";
+
+const { lang, setLang } = useLanguage();
 
 export default {
     name: "WelcomeView",
@@ -9,8 +13,16 @@ export default {
             emailOrUsername: "",
             password: "",
             showPassword: false,
-            errorMessage: ""
+            errorMessage: "",
         };
+    },
+    computed: {
+        t() {
+            return translations[lang.value];
+        },
+        currentLang() {
+            return lang.value;
+        }
     },
     methods: {
         async login() {
@@ -18,23 +30,26 @@ export default {
                 const user = await AuthService.login(this.emailOrUsername, this.password);
 
                 if(user) {
-                    console.log("User logged in:", user);
+                    //console.log("User logged in:", user);
                     //alert("Login successful!");
                     this.$router.push('/dashboard');
                 } else {
-                    this.errorMessage = "Invalid credentials, please try again.";
+                    this.errorMessage = this.t.errorInvalid;
                 }
                 
             } catch (error) {
                 if (error.response && error.response.data.error) {
                     this.errorMessage = error.response.data.error; // Extrage doar mesajul de eroare
                 } else {
-                    this.errorMessage = "Login failed. Please try again.";
+                    this.errorMessage = this.t.errorGeneric;
                 }           
              }
         },
         togglePassword() {
             this.showPassword = !this.showPassword;
+        },
+        toggleLang() {
+            setLang(lang.value === 'en' ? 'ro' : 'en');
         }
     }
 };
@@ -44,24 +59,34 @@ export default {
 
 <template>
     <div class="container">
-        <div class="left">
-            <h1>Getting your degree can be <span>tough</span>, but you don't have to do it alone.</h1>
-<p>With <span>Study Buddy</span>, staying organized and on top of your tasks has <span>never been easier!</span></p>
 
-            
+        <div class="language-toggle">
+            <label class="switch">
+                <input type="checkbox" :checked="currentLang === 'ro'" @change="toggleLang">
+                <span class="slider-switch">
+                    <span class="lang-label en" :class="{ selected: currentLang === 'en' }">EN</span>
+                    <span class="lang-label ro" :class="{ selected: currentLang === 'ro' }">RO</span>
+                </span>
+            </label>
         </div>
+
+        <div class="left">
+            <h1 v-html="t.introTitle"></h1>
+            <p v-html="t.introText"></p>
+        </div>
+
         <div class="right">
             <div class="login-box">
                
                 <form @submit.prevent="login">
 
-                    <input type="text" v-model="emailOrUsername" placeholder="Username or Email" required />
+                    <input type="text" v-model="emailOrUsername" :placeholder="t.usernameOrEmail" required />
 
                     <div class="password-container">
                         <input
                             :type="showPassword ? 'text' : 'password'"
                             v-model="password"
-                            placeholder="Password"
+                            :placeholder="t.password"
                             required
                         />
 
@@ -77,13 +102,13 @@ export default {
                 </form>
 
                 <p class="forgot-password">
-                    <router-link to="/forgot-password">Forgot Password?</router-link>
+                    <router-link to="/forgot-password">{{ t.forgotPassword }}</router-link>
                 </p>
 
 
                 <p class="signup-text">
-                    Don't have an account?
-                    <router-link to="/signup" class="signup-link">Sign up</router-link>
+                    {{ t.noAccount }}
+                    <router-link to="/signup" class="signup-link">{{ t.signup }}</router-link>
                 </p>
             </div>
         </div>
@@ -95,6 +120,65 @@ export default {
 
 
 <style scoped>
+
+.language-toggle {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 999;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+    cursor: pointer;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider-switch {
+    background-color: #ccc;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    height: 100%;
+}
+
+
+.lang-label {
+    width: 50%;
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 6px 0;
+    border-radius: 4px;
+    color: #666;
+    background-color: transparent;
+    transition: all 0.3s ease;
+}
+
+.lang-label.selected {
+    background-color: #e91ea5;
+    color: white;
+}
+
+
+:deep(.highlight) {
+    color: #e91ea5;
+    font-weight: bold;
+}
+
+
 
 .forgot-password {
     margin-top: 10px;

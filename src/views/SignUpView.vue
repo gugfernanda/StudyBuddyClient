@@ -1,5 +1,9 @@
 <script>
 import AuthService from "../services/AuthService.js"
+import { translations } from "../translations.js"
+import { useLanguage } from "../language.js";
+
+const { lang } = useLanguage();
 
 export default {
     name: "SignUpView",
@@ -13,8 +17,13 @@ export default {
             showPassword: false,
             showConfirmPassword: false,
             errorMessage: "",
-            successMessage: ""
+            successMessage: "",
         };
+    },
+    computed: {
+        t() {
+            return translations[lang.value];
+        }
     },
     methods: {
         async register () {
@@ -23,24 +32,24 @@ export default {
             this.successMessage = "";
 
             if(this.password.length < 8) {
-                this.errorMessage = "Password must be at least 8 characters long";
+                this.errorMessage = this.t.passwordTooShort;
                 return;
             }
             if(!/[A-Z]/.test(this.password)) {
-                this.errorMessage = "Password must contain at least one uppercase letter";
+                this.errorMessage = this.t.passwordNoUpper;
                 return;
             }
             if(!/\d/.test(this.password)) {
-                this.errorMessage = "Password must contain at least one digit";
+                this.errorMessage = this.t.passwordNoDigit;
                 return;
             }
             if(!/[@$!%*?&]/.test(this.password)) {
-                this.errorMessage = "Password must contain at least one special character";
+                this.errorMessage = this.t.passwordsNoSpecial;
                 return;
             }
 
             if(this.password !== this.confirmPassword) {
-                this.errorMessage = "Passwords do not match!";
+                this.errorMessage = this.t.passwordsDontMatch;
                 return;
             }
 
@@ -49,7 +58,7 @@ export default {
 
                 console.log("User registered:", user);
 
-                this.successMessage = "Account created successfully! You can now log in.";
+                this.successMessage = this.t.signupSuccess;
                 this.username = "";
                 this.fullName = "";
                 this.email = "";
@@ -60,7 +69,7 @@ export default {
                 this.$router.push("/");
                 }, 2000);
             } catch (error) {
-                this.errorMessage = error.response ? error.response.data : "Sign up failed. Please try again.";
+                this.errorMessage = error.response ? error.response.data : this.t.signupFail;
                 console.error("Sign up error:", error);
 
                 return;
@@ -71,6 +80,9 @@ export default {
         },
         toggleConfirmPassword() {
             this.showConfirmPassword = !this.showConfirmPassword;
+        },
+        toggleLang() {
+            setLang(lang.value === "en" ? "ro" : "en");
         }
     }
 }
@@ -79,21 +91,21 @@ export default {
 <template>
     <div class="signup-container">
         <div class="signup-box">
-            <h2>Sign Up</h2>
+            <h2>{{ t.signupTitle }}</h2>
             <form @submit.prevent="register">
-                <input type="text" v-model="fullName" placeholder="Full Name" required />
-                <input type="text" v-model="username" placeholder="Username" required />
-                <input type="email" v-model="email" placeholder="Email" required />
+                <input type="text" v-model="fullName" :placeholder="t.fullName" required />
+                <input type="text" v-model="username" :placeholder="t.username" required />
+                <input type="email" v-model="email" :placeholder="t.email" required />
                 
                 <div class="password-container">
-                    <input :type="showPassword ? 'text' : 'password'" v-model="password" placeholder="Password" required />
+                    <input :type="showPassword ? 'text' : 'password'" v-model="password" :placeholder="t.password" required />
                     <span class="toggle-password" @click="togglePassword">
                         <i :class="showPassword ? 'mdi mdi-eye-off' : 'mdi mdi-eye'"></i>
                     </span>
                 </div>
 
                 <div class="password-container">
-                    <input :type="showConfirmPassword ? 'text' : 'password'" v-model="confirmPassword" placeholder="Confirm Password" required />
+                    <input :type="showConfirmPassword ? 'text' : 'password'" v-model="confirmPassword" :placeholder="t.confirmPassword" required />
                     <span class="toggle-password" @click="toggleConfirmPassword">
                         <i :class="showConfirmPassword ? 'mdi mdi-eye-off' : 'mdi mdi-eye'"></i>
                     </span>
@@ -102,12 +114,12 @@ export default {
                 <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
                 <p v-if="successMessage" class="success-message">{{ successMessage }}</p>
 
-                <button type="submit">Sign Up</button>
+                <button type="submit">{{ t.signupTitle }}</button>
                 
             </form>
             <p class="login-text">
-                Already have an account?
-                <router-link to="/" class="login-link">Login</router-link>
+                {{ t.alreadyHaveAccount }}
+                <router-link to="/" class="login-link">{{ t.login }}</router-link>
             </p>
         </div>
     </div>
