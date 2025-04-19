@@ -1,9 +1,18 @@
 <script>
 import AuthService from "../services/AuthService.js";
+import { translations } from "../translations.js";
+import { useLanguage } from "../language.js";
 
 export default {
     name: "SidebarDashboard",
     props: ["currentSection"],
+    computed: {
+
+        t(){
+            const { lang } = useLanguage();
+            return translations[lang.value];
+        }
+    },
     methods: {
         changeSection(section) {
             this.$emit("sectionChanged", section);
@@ -23,11 +32,11 @@ export default {
         async logout() {
             try {
                 await AuthService.logout();
-                alert("Logged out!");
+                alert(this.t.logoutSuccess);
                 this.$router.push("/");
             } catch (error) {
                 console.error("Logout failed", error);
-                alert("Logout failed. Please try againn");
+                alert(this.t.logoutFail);
             }
         }
     }
@@ -41,7 +50,7 @@ export default {
         <nav>
             <ul>
                 <li @click="handleTasksClick" :class="{ active: currentSection === 'tasks' }">
-                    <span class="mdi mdi-format-list-bulleted"></span> My Tasks
+                    <span class="mdi mdi-format-list-bulleted"></span> {{ t.myTasks }}
                 </li>
                 <!-- <li @click="changeSection('completed')" :class="{ active: currentSection === 'completed' }">
                     <span class="mdi mdi-check-circle"></span> Completed
@@ -50,13 +59,13 @@ export default {
                     <span class="mdi mdi-folder"></span> Categories
                 </li> -->
                 <li @click="changeSection('pomodoro')" :class="{ active: currentSection === 'pomodoro'}">
-                    <span class="mdi mdi-timer"></span> Pomodoro Timer
+                    <span class="mdi mdi-timer"></span> {{ t.pomodoroTimer }}
                 </li>
                 <li @click="changeSection('calendar')" :class="{ active: currentSection === 'calendar'}">
-                    <span class="mdi mdi-calendar-month"></span> Academic Calendar
+                    <span class="mdi mdi-calendar-month"></span> {{ t.academicCalendar }}
                 </li>
                 <li class="logout" @click="logout">
-                    <span class="mdi mdi-logout"></span> Logout
+                    <span class="mdi mdi-logout"></span> {{ t.logout }}
                 </li>
             </ul>
         </nav>

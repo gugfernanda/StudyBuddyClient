@@ -76,7 +76,12 @@ export const translations = {
         verifying: "Verifying...",
         errorSendResetLink: "Error sending reset link. Please try again.",
         invalidCodeError: "Invalid code. Please try again.",  
-        verificationCodeSent: "Verification code sent to email.",     
+        verificationCodeSent: "Verification code sent to email.",    
+        //sidebar
+        pomodoroTimer: "Pomodoro Timer",
+        logout: "Logout",
+        logoutSuccess: "Logged out successfully!",
+        logoutFail: "Logout failed. Please try again.",
     },
     ro: {
         login: "Autentificare",
@@ -154,7 +159,12 @@ export const translations = {
         verifying: "Se verifică...",
         errorSendResetLink: "Eroare la trimiterea linkului de resetare. Încearcă din nou.",
         invalidCodeError: "Cod invalid. Te rugăm să încerci din nou.",  
-        verificationCodeSent: "Codul de verificare a fost trimis pe email.",    
+        verificationCodeSent: "Codul de verificare a fost trimis pe email.",
+        //sidebar   
+        pomodoroTimer: "Timer Pomodoro",
+        logout: "Deconectare",
+        logoutSuccess: "Te-ai deconectat cu succes!",
+        logoutFail: "Deconectarea a eșuat. Te rugăm să încerci din nou.", 
     },
 
   };

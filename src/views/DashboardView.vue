@@ -81,10 +81,10 @@ export default {
                 this.fetchTasks();
             } else if (section === "pomodoro") {
                 this.$router.push("/pomodoro"); 
-            } 
-            // else if (section === "calendar") {
-            //     this.currentSection = "calendar";
-            // }
+            } else if (section === "calendar") {
+                this.currentSection = "calendar";
+            }
+            
 
         },
 
@@ -238,7 +238,7 @@ export default {
             <NavBar />
             <div class="dashboard-content">
                 <div class="header">
-                    <h1 class="tasks-title">{{ t.myTasks }}</h1>
+                    <h1 class="tasks-title" v-if="currentSection !== 'calendar'">{{ t.myTasks }}</h1>
                     <div class="task-buttons" v-if="currentSection ==='tasks'">
                         <button class="add-task-button" @click="showAddTaskModal = true">{{ t.addTask }}</button>
                         <button class="clear-completed-btn" v-if="tasks.some(task => task.state === 'DONE')" @click="clearCompletedTasks">
