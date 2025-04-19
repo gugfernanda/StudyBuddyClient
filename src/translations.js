@@ -82,6 +82,16 @@ export const translations = {
         logout: "Logout",
         logoutSuccess: "Logged out successfully!",
         logoutFail: "Logout failed. Please try again.",
+        //pomodoro
+        pomodoroTitle: "Pomodoro Timer",
+        pomodoroSession: "Pomodoro",
+        shortBreakSession: "Short Break",
+        longBreakSession: "Long Break",
+        start: "Start",
+        pause: "Pause",
+        reset: "Reset",
+        backToDashboard: "Back to Dashboard",
+        pomodoroComplete: "Pomodoro complete! Time for a break.",
     },
     ro: {
         login: "Autentificare",
@@ -164,7 +174,17 @@ export const translations = {
         pomodoroTimer: "Timer Pomodoro",
         logout: "Deconectare",
         logoutSuccess: "Te-ai deconectat cu succes!",
-        logoutFail: "Deconectarea a eșuat. Te rugăm să încerci din nou.", 
+        logoutFail: "Deconectarea a eșuat. Te rugăm să încerci din nou.",
+        //pomodoro 
+        pomodoroTitle: "Timer Pomodoro",
+        pomodoroSession: "Pomodoro",
+        shortBreakSession: "Pauză scurtă",
+        longBreakSession: "Pauză lungă",
+        start: "Începe",
+        pause: "Pauză",
+        reset: "Resetează",
+        backToDashboard: "Înapoi la Dashboard",
+        pomodoroComplete: "Pomodoro terminat! E timpul pentru o pauză.",
     },
 
   };

@@ -1,4 +1,6 @@
 <script>
+import { translations } from "../translations.js";
+import { useLanguage } from "../language.js";
 
 export default {
     data() {
@@ -11,6 +13,12 @@ export default {
     },
 
     computed: {
+        lang() {
+            return useLanguage().lang.value;
+        },
+        t() {
+            return translations[this.lang];
+        },
         formattedTime() {
             const minutes = Math.floor(this.timeLeft / 60);
             const seconds = this.timeLeft % 60;
@@ -33,7 +41,7 @@ export default {
                         this.timeLeft--;
                     } else {
                         this.stopTimer();
-                        alert("Pomodoro complete! Time for a break.");
+                        alert(this.t.pomodoroComplete);
                     }
                 }, 1000);
             }
@@ -84,12 +92,12 @@ export default {
 <template>
     <div class="pomodoro-wrapper">
     <div class="pomodoro-container">
-        <h1>Pomodoro Timer</h1>
+        <h1>{{ t.pomodoroTitle }}</h1>
 
         <div class="session-buttons">
-                <button @click="setSession('pomodoro')" :class="{ active: session === 'pomodoro' }">Pomodoro</button>
-                <button @click="setSession('shortBreak')" :class="{ active: session === 'shortBreak' }">Short Break</button>
-                <button @click="setSession('longBreak')" :class="{ active: session === 'longBreak' }">Long Break</button>
+                <button @click="setSession('pomodoro')" :class="{ active: session === 'pomodoro' }">{{ t.pomodoroSession }}</button>
+                <button @click="setSession('shortBreak')" :class="{ active: session === 'shortBreak' }">{{ t.shortBreakSession }}</button>
+                <button @click="setSession('longBreak')" :class="{ active: session === 'longBreak' }">{{ t.longBreakSession }}</button>
         </div>
 
         <div class="circle">
@@ -105,13 +113,13 @@ export default {
             <div class="timer">{{ formattedTime }}</div>
         </div>
         <div class="controls">
-            <button @click="startTimer" v-if="!isRunning">Start</button>
-            <button @click="pauseTimer" v-if="isRunning">Pause</button>
-            <button @click="resetTimer">Reset</button>
+            <button @click="startTimer" v-if="!isRunning">{{ t.start }}</button>
+            <button @click="pauseTimer" v-if="isRunning">{{ t.pause }}</button>
+            <button @click="resetTimer">{{ t.reset }}</button>
         </div>
 
         <button class="back-button" @click="goBack">
-            <i class="mdi mdi-arrow-left"></i> Back to Dashboard
+            <i class="mdi mdi-arrow-left"></i> {{ t.backToDashboard }}
         </button>
 
     </div>
