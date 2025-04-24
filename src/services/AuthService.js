@@ -45,6 +45,16 @@ const AuthService = {
         }
     },
 
+    async getUserByUsername(username) {
+        try {
+            const response = await axios.get(`${API_URL}/user-by-username?username=${username}`);
+            return response.data;
+        } catch(error) {
+            console.error("Failed to get user by username", error.response ? error.response.data : error.message);
+            throw error;
+        }
+    },
+
     async register(username, fullName, email, password) {
         try {
             const requestData = { username, fullName, email, password };
