@@ -2,12 +2,18 @@ import axios from "axios";
 
 axios.defaults.withCredentials = true;
 
+const language = localStorage.getItem("language") || "en";
+
 const API_URL = "http://localhost:8080/notifications";
 
 const NotificationService = {
     async getNotifications(userId) {
         try {
-            const response = await axios.get(`${API_URL}?userId=${userId}`);
+            const response = await axios.get(`${API_URL}?userId=${userId}`, {
+                headers: {
+                    'Accept-Language': language
+                }
+            });
             return response.data;
         } catch(error) {
             console.error("Error fetching notifications:", error.response ? error.response.data : error.message);
