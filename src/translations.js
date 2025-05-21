@@ -92,6 +92,33 @@ export const translations = {
         reset: "Reset",
         backToDashboard: "Back to Dashboard",
         pomodoroComplete: "Pomodoro complete! Time for a break.",
+        //calendar
+        addSchedule: "Add Schedule",
+        eventTitle: "Event Title",
+        eventDescription: "Event Description",
+        addManualSchedule: "Add Schedule",
+        title: "Title",
+        description: "Description",
+        dayOfWeek: "Day of Week",
+        label: "Label",
+        scheduleLabel: "Ex: INFO YEAR 2",
+        scheduleLabelHelp: "Use the same label for all courses in this schedule so you can easily delete the full schedule at once if you wish.",
+        startDate: "Start of the semester",
+        repeatUntil: "End of the semester",
+        import: "Add Schedule",
+        edit: "Edit",
+        end: "End",
+        importSuccess: "Schedule imported successfully!",
+        importFail: "Failed to import schedule. Please try again.",
+        days: {
+          monday: "Monday",
+          tuesday: "Tuesday",
+          wednesday: "Wednesday",
+          thursday: "Thursday",
+          friday: "Friday",
+          saturday: "Saturday",
+          sunday: "Sunday"
+        }
     },
     ro: {
         login: "Autentificare",
@@ -185,6 +212,33 @@ export const translations = {
         reset: "Resetează",
         backToDashboard: "Înapoi la Dashboard",
         pomodoroComplete: "Pomodoro terminat! E timpul pentru o pauză.",
+        //calendar
+        addSchedule: "Adaugă orar",
+        eventTitle: "Titlul evenimentului",
+        eventDescription: "Descrierea evenimentului",
+        addManualSchedule: "Adaugare orar",
+        title: "Titlu",
+        description: "Descriere",
+        dayOfWeek: "Ziua săptămânii",
+        scheduleLabel: "Ex: INFO AN 2",
+        label: "Etichetă",
+        scheduleLabelHelp: "Folosește aceeași etichetă pentru toate orele din același orar pentru a putea șterge orarul integral dacă este nevoie.",
+        startDate: "Începutul semestrului",
+        repeatUntil: "Finalul semestrului",
+        importSuccess: "Orar importat cu succes!",
+        importFail: "Importul orarului a eșuat. Încearcă din nou.",
+        import: "Adaugă orar",
+        edit: "Editează",
+        end: "Sfârșit",
+        days: {
+          monday: "Luni",
+          tuesday: "Marți",
+          wednesday: "Miercuri",
+          thursday: "Joi",
+          friday: "Vineri",
+          saturday: "Sâmbătă",
+          sunday: "Duminică"
+        }
     },
 
   };

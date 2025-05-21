@@ -4,6 +4,11 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import EventService from '../services/EventService.js';
 import AuthService from '../services/AuthService.js';
+import ScheduleImport from '../services/ScheduleImport.js';
+import { translations } from "../translations.js";
+import { useLanguage } from "../language.js";
+
+const { lang } = useLanguage();
 
 export default {
     name: "CalendarView",
@@ -15,20 +20,7 @@ export default {
         return {
             username: "",
             events: [],
-            calendarOptions: {
-                plugins: [dayGridPlugin, interactionPlugin],
-                initialView: 'dayGridMonth',
-                selectable: true,
-                editable: true,
-                events: [],
-                dateClick: this.handleDateClick,
-                eventClick: this.handleEventClick,
-                eventTimeFormat: {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    meridiem: 'short'
-                }
-            },
+            calendarOptions: {},
             eventDetails: {
             title: "",
             description: "",
@@ -52,9 +44,42 @@ export default {
                 endTime: ""
             },
             showModal: false,
+            showImportModal: false,
+            showLabelTip: false,
+            importDto: {
+                title: '',
+                description: '',
+                dayOfWeek: 'MONDAY',
+                startTime: '08:00',
+                endTime: '09:00',
+                scheduleLabel: '',
+                startDate: '',
+                repeatUntil: ''
+            }
         };
     },
+    computed: {
+        t() {
+            return translations[lang.value];
+        }
+    },
+
     async created() {
+        this.calendarOptions = {
+            plugins: [dayGridPlugin, interactionPlugin],
+            initialView: 'dayGridMonth',
+            selectable: true,
+            editable: true,
+            events: [],
+            dateClick: this.handleDateClick,
+            eventClick: this.handleEventClick,
+            eventTimeFormat: {
+                hour: '2-digit',
+                minute: '2-digit',
+                meridiem: 'short'
+            },
+            
+        };
         await this.loadUserAndEvents();
     },
     methods: {
@@ -271,11 +296,40 @@ export default {
                 }
         
         },
+
+        async importManualSchedule() {
+            try {
+                await ScheduleImport.importManualSchedule(this.importDto)
+                this.showImportModal = false
+                Object.assign(this.importDto, {
+                    title: '',
+                    description: '',
+                    dayOfWeek: 'MONDAY',
+                    startTime: '08:00',
+                    endTime: '09:00',
+                    scheduleLabel: '',
+                    startDate: '',
+                    repeatUntil: ''
+                })
+                await this.fetchEvents()
+                alert(this.t.importSuccess)
+            } catch {
+                alert(this.t.importFail)
+            }
+        }
     },
 };
 </script>
 
 <template>
+
+    <div class="calendar-view">
+
+    <div class="import-header" style="text-align: right; margin-bottom: 1em;">
+        <button class="save-btn" @click="showImportModal = true">
+            {{ t.addSchedule }}
+        </button>
+    </div> 
     
     <div class="calendar-container">
         <FullCalendar :options="calendarOptions" />
@@ -295,12 +349,12 @@ export default {
             </div>
                 
             
-            <p><strong>Start:</strong> {{ eventDetails.start }}</p>
-            <p><strong>End:</strong> {{ eventDetails.end }}</p>
-            <p><strong>Description:</strong> {{ eventDetails.description }}</p>
+            <p><strong>{{ t.start }}:</strong> {{ eventDetails.start }}</p>
+            <p><strong>{{ t.end }}:</strong> {{ eventDetails.end }}</p>
+            <p><strong>{{ t.description }}:</strong> {{ eventDetails.description }}</p>
             <div class="button-container">
-                <button class="edit-btn" @click="openEditModal">Edit</button>
-                <button class="close-btn" @click="eventDetails.visible = false">Close</button>
+                <button class="edit-btn" @click="openEditModal">{{ t.edit }}</button>
+                <button class="close-btn" @click="eventDetails.visible = false">{{ t.cancel }}</button>
             </div>
 
 
@@ -309,27 +363,27 @@ export default {
 
     <div v-if="showEditModal" class="modal-overlay">
         <div class="modal">
-            <h2>Edit Event</h2>
+            <h2>{{ t.edit }}</h2>
 
             <input v-model="editedEvent.title" type="text" placeholder="Event Title" />
             <textarea v-model="editedEvent.description" placeholder="Event Description"></textarea>
 
             <div class="time-picker">
-                <label for="edit-start">Starts</label>
+                <label for="edit-start">{{ t.start }}</label>
                 <div class="date-time-container">
                     <input type="datetime-local" id="edit-start" v-model="editedEvent.startTime" />
                 </div>
             </div>
 
             <div class="time-picker">
-                <label for="edit-end">Ends</label>
+                <label for="edit-end">{{ t.end }}</label>
                 <div class="date-time-container">
                     <input type="datetime-local" id="edit-end" v-model="editedEvent.endTime" />
                 </div>
             </div>
 
-            <button class="save-btn" @click="updateEvent">Save Changes</button>
-            <button class="cancel-btn" @click="showEditModal = false">Cancel</button>
+            <button class="save-btn" @click="updateEvent">{{ t.save }}</button>
+            <button class="cancel-btn" @click="showEditModal = false">{{ t.cancel }}</button>
         </div>
     </div>
 
@@ -337,14 +391,14 @@ export default {
 
     <div v-if="showModal" class="modal-overlay">
         <div class="modal">
-            <h2>Add Event</h2>
+            <h2>{{ t.addEvent }}</h2>
 
             <input v-model="newEventTitle" type="text" placeholder="Event Title" />
 
             <textarea v-model="newEventDescription" placeholder="Event Description"></textarea>
 
             <div class="time-picker">
-                <label for="start-date">Starts</label>
+                <label for="start-date">{{ t.start }}</label>
                 <div class="date-time-container">
                     <input type="date" id="start-date" v-model="newEventStartDate"/>
                     <input type="time" v-model="newEventStartTime"/>
@@ -352,22 +406,240 @@ export default {
             </div>
 
             <div class="time-picker">
-                <label for="end-date">Ends</label>
+                <label for="end-date">{{ t.end }}</label>
                 <div class="date-time-container">
                     <input type="date" id="end-date" v-model="newEventEndDate"/>
                     <input type="time" v-model="newEventEndTime"/>
                 </div>
             </div>
 
-            <button class="save-btn" @click="addEvent">Save</button>
-            <button class="cancel-btn" @click="showModal = false">Cancel</button>
+            <button class="save-btn" @click="addEvent">{{ t.save }}</button>
+            <button class="cancel-btn" @click="showModal = false">{{ t.cancel }}</button>
         </div>
 
     </div>
 
+    <div v-if="showImportModal" class="modal-overlay import-modal-overlay">
+        <div class="modal import-modal" style="width: 400px;">
+            <h2>{{ t.addManualSchedule }}</h2>
+
+            <input v-model="importDto.title" type="text" :placeholder="t.title" />
+            <textarea v-model="importDto.description" :placeholder="t.description"></textarea>
+
+            <div class="form-row-inline">
+                <label for="day-of-week">{{ t.dayOfWeek }}</label>
+                <select
+                    id="day-of-week"
+                    v-model="importDto.dayOfWeek"
+                    class="form-input"
+                    >
+                    <option
+                        v-for="d in ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY']"
+                        :key="d"
+                        :value="d"
+                        >
+                    {{ t.days[d.toLowerCase()] }}
+                    </option>
+                </select>
+            </div>
+
+            <div class="time-picker">
+                <label>{{ t.start }}</label>
+                <input type="time" v-model="importDto.startTime" />
+            </div>
+
+            <div class="time-picker">
+                <label>{{ t.end }}</label>
+                <input type="time" v-model="importDto.endTime" />
+            </div>
+
+            <div class="schedule-label-container">
+                <input
+                    v-model="importDto.scheduleLabel"
+                    type="text"
+                    :placeholder="t.scheduleLabel"
+                    class="form-control"
+                />
+                <span class="help-icon">?</span>
+                <div class="tooltip-box">
+                    {{ t.scheduleLabelHelp }}
+                </div>
+            </div>
+
+
+            <div class="form-row">
+                <label for="start-semester">{{ t.startDate }}</label>
+                <input id="start-semester" 
+                        v-model="importDto.startDate" 
+                        type="date" 
+                        class="date-input" />
+            </div>
+
+            <div class="form-row">
+                <label for="end-semester">{{ t.repeatUntil }}</label>
+                <input id="end-semester" 
+                        v-model="importDto.repeatUntil" 
+                        type="date" 
+                        class="date-input" />
+            </div>
+
+
+            <button class="save-btn" @click="importManualSchedule">{{ t.import }}</button>
+            <button class="cancel-btn" @click="showImportModal = false">{{ t.cancel }}</button>
+
+
+        </div>
+
+    </div>
+    </div>
+
 </template>
 
+
+
 <style scoped>
+
+.form-row-inline {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-row-inline label {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.form-row-inline .form-input {
+    flex: 1;
+    max-width: 200px;    
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    color: #002241;
+}
+
+
+.form-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.form-row label {
+  flex: 0 0 auto;         
+  font-weight: bold;
+  color: #002241;
+  margin-right: 1rem;
+  white-space: nowrap;
+}
+
+.form-row .date-input {
+  flex: 1;                 
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+
+.schedule-label-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  
+}
+
+.schedule-label-container .form-control {
+  flex: 1;
+}
+
+.schedule-label-container .help-icon {
+  width: 2rem;
+  height: 2rem;
+  background-color: #e91ea5; 
+  color: white;
+  border: none;
+  border-radius: 0.25rem;      
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.schedule-label-container .tooltip-box {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  color: #002241;
+  padding: 0.75rem;
+  border: 1px solid #e91ea5;
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  white-space: normal;
+  width: 200px;
+  margin-top: 0.5rem;
+  z-index: 10;
+  display: none;
+}
+
+.schedule-label-container .help-icon:hover + .tooltip-box {
+  display: block;
+}
+
+
+.import-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1em;
+}
+
+.import-header .save-btn {
+  background-color: #e91ea5;       /* sau aceeași culoare ca today (#e91ea5) */
+  color: white;
+  width: auto !important;          
+  padding: 6px 12px !important;    
+  font-size: 1rem !important;      
+  border-radius: 0.375rem !important;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s;
+}
+
+.import-header .save-btn:hover {
+  background-color: #c2185b;
+}
+
+
+.import-modal-overlay {
+  display: flex !important;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 0rem;
+  background: rgba(0,0,0,0.5);
+
+}
+
+.import-modal {
+  max-height: 90vh;
+  overflow-y: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  width: 350px;
+  box-sizing: border-box;
+}
+
+
+
 
 .edit-btn {
     background: #e91ea5;
