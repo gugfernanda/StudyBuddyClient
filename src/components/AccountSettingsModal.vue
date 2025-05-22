@@ -29,6 +29,7 @@ export default {
                 email: '',
             },
             original: {},
+            initialForm: {},
             editing: {
                 username: false,
                 fullName: false,
@@ -61,6 +62,7 @@ export default {
             this.form.fullName = dto.full_name;
             this.form.email = dto.email;
             this.original = { ...this.form };
+            this.initialForm = {...this.form};
         } catch (error) {
             console.error('Failed to load user data:', error);
         }
@@ -117,14 +119,25 @@ export default {
         async saveChanges() {
             const payload = {};
             ['username','fullName','email'].forEach(f => {
-                if (this.original[f] !== this.form[f]) payload[f] = this.form[f];
+                if (this.initialForm[f] !== this.form[f]) {
+                  payload[f] = this.form[f];
+                }
             });
             if (this.passwordOpen && this.form.newPassword) {
                 payload.oldPassword = this.form.oldPassword;
                 payload.newPassword = this.form.newPassword;
             }
+
+            console.log('payload for update:', payload);
+
+            if (Object.keys(payload).length === 0) {
+              alert('Nu ai schimbat nimic!');
+              return;
+            }
+
             try {
                 await UserService.updateUser(this.userId, payload);
+                this.initialForm = { ...this.form };
                 this.$emit('updated');
                 this.close();
             } catch (err) {
@@ -206,45 +219,45 @@ export default {
         </div>
       <div v-if="passwordOpen" class="password-fields">
 
-    <!-- Current Password -->
-    <div class="form-group pw-group">
-      <label for="oldPassword">{{ t.currentPassword }}</label>
-      <div class="pw-wrapper">
-        <input
-          id="oldPassword"
-          class="pw-input"
-          :type="showOldPassword ? 'text' : 'password'"
-          v-model="form.oldPassword"
-        />
-        <button type="button" class="pw-toggle" @click="toggleOldPassword">
-          <i class="mdi" :class="showOldPassword ? 'mdi-eye-off' : 'mdi-eye'"></i>
-        </button>
+    
+      <div class="form-group pw-group">
+        <label for="oldPassword">{{ t.currentPassword }}</label>
+        <div class="pw-wrapper">
+          <input
+            id="oldPassword"
+            class="pw-input"
+            :type="showOldPassword ? 'text' : 'password'"
+            v-model="form.oldPassword"
+          />
+          <button type="button" class="pw-toggle" @click="toggleOldPassword">
+            <i class="mdi" :class="showOldPassword ? 'mdi-eye-off' : 'mdi-eye'"></i>
+          </button>
+        </div>
       </div>
-    </div>
 
-    <!-- New Password -->
-    <div class="form-group pw-group">
-      <label for="newPassword">{{ t.newPassword }}</label>
-      <div class="pw-wrapper">
-        <input
-          id="newPassword"
-          class="pw-input"
-          :type="showNewPassword ? 'text' : 'password'"
-          v-model="form.newPassword"
-          @input="validatePassword"
-        />
-        <button type="button" class="pw-toggle" @click="toggleNewPassword">
-          <i class="mdi" :class="showNewPassword ? 'mdi-eye-off' : 'mdi-eye'"></i>
-        </button>
+ 
+      <div class="form-group pw-group">
+        <label for="newPassword">{{ t.newPassword }}</label>
+        <div class="pw-wrapper">
+          <input
+            id="newPassword"
+            class="pw-input"
+            :type="showNewPassword ? 'text' : 'password'"
+            v-model="form.newPassword"
+            @input="validatePassword"
+          />
+            <button type="button" class="pw-toggle" @click="toggleNewPassword">
+              <i class="mdi" :class="showNewPassword ? 'mdi-eye-off' : 'mdi-eye'"></i>
+            </button>
+        </div>
+          <small v-if="passwordError" class="error">{{ passwordError }}</small>
+        </div>
+
       </div>
-      <small v-if="passwordError" class="error">{{ passwordError }}</small>
-    </div>
-
   </div>
-</div>
 
 
-        <!-- Actions -->
+      
         <div class="form-actions">
           <button type="button" class="btn-save" @click="saveChanges" :disabled="passwordError">{{ t.saveAll }}</button>
           <button type="button" class="btn-cancel" @click="close">{{ t.cancel }}</button>
@@ -279,9 +292,9 @@ export default {
 }
 
 .btn-cancel {
-   background: #002241;        /* albastru Study Buddy */
-  color: #ffffff;             /* text alb pentru contrast */
-  border: none;               /* fără bordură */
+   background: #002241;       
+  color: #ffffff;            
+  border: none;               
   border-radius: 4px;
   padding: 0.5rem 1rem;
   cursor: pointer;
