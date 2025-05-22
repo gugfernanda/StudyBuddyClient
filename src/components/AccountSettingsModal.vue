@@ -2,6 +2,7 @@
 import UserService from '../services/UserService.js'
 import { translations } from "../translations.js";
 import { useLanguage } from "../language.js";
+import { ref, computed } from 'vue'
 
 export default {
     name: 'AccountSettingsModal',
@@ -11,6 +12,13 @@ export default {
             required: true
         }
     },
+
+    setup() {
+      const { lang, setLang } = useLanguage();
+      const t = computed(() => translations[lang.value]);
+      return { lang, setLang, t };
+    },
+
     data() {
         return {
             form: {
@@ -35,10 +43,6 @@ export default {
 
 
     computed: {
-        t() {
-          const {lang} = useLanguage();
-          return translations[lang.value];
-        },
 
         fields() {
             return [
@@ -76,6 +80,9 @@ export default {
         saveField(field) {
             this.original[field] = this.form[field];
             this.editing[field] = false;
+        },
+        switchLang(code) {
+          this.setLang(code);
         },
         togglePassword() {
             this.passwordOpen = !this.passwordOpen;
@@ -133,7 +140,19 @@ export default {
     <div class="modal">
       <header class="modal-header">
         <h3>{{ t.updateProfile }}</h3>
-        <button class="close-btn" @click="close">&times;</button>
+
+         <div class="lang-switch">
+          <button
+            :class="{ active: lang === 'ro' }"
+            @click="switchLang('ro')"
+          >RO</button>
+          <button
+            :class="{ active: lang === 'en' }"
+            @click="switchLang('en')"
+          >EN</button>
+        </div>
+
+        <!-- <button class="close-btn" @click="close">&times;</button> -->
       </header>
       <section class="modal-body">
 
@@ -180,12 +199,12 @@ export default {
         </div>
 
         <!-- Password Section -->
-<div class="password-section">
-  <div class="password-header" @click="togglePassword">
-    <i class="mdi" :class="passwordOpen ? 'mdi-chevron-down' : 'mdi-chevron-right'"></i>
-    <span>{{ t.changePassword }}</span>
-  </div>
-  <div v-if="passwordOpen" class="password-fields">
+      <div class="password-section">
+        <div class="password-header" @click="togglePassword">
+          <i class="mdi" :class="passwordOpen ? 'mdi-chevron-down' : 'mdi-chevron-right'"></i>
+          <span>{{ t.changePassword }}</span>
+        </div>
+      <div v-if="passwordOpen" class="password-fields">
 
     <!-- Current Password -->
     <div class="form-group pw-group">
@@ -227,8 +246,8 @@ export default {
 
         <!-- Actions -->
         <div class="form-actions">
-          <button type="button" @click="close">{{ t.cancel }}</button>
-          <button type="button" @click="saveChanges" :disabled="passwordError">{{ t.saveAll }}</button>
+          <button type="button" class="btn-save" @click="saveChanges" :disabled="passwordError">{{ t.saveAll }}</button>
+          <button type="button" class="btn-cancel" @click="close">{{ t.cancel }}</button>
         </div>
 
       </section>
@@ -241,6 +260,65 @@ export default {
 
 
 <style scoped>
+
+.btn-save {
+  background: #e91ea5;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-save:not(:disabled):hover {
+  background: #d11691;
+}
+
+.btn-cancel {
+   background: #002241;        /* albastru Study Buddy */
+  color: #ffffff;             /* text alb pentru contrast */
+  border: none;               /* fără bordură */
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn-cancel:hover {
+  background: #001a35;
+}
+
+.lang-switch {
+  display: inline-flex;
+  gap: 0.25rem;
+  margin-left: auto; 
+}
+
+
+.lang-switch button {
+  background: #f5f5f5;      
+  color: #333;              
+  border: 1px solid #ccc;  
+  border-radius: 3px;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.lang-switch button:not(.active):hover {
+  background: #eaeaea;    
+}
+
+
+.lang-switch button.active {
+  background: #e91ea5;       
+  color: #fff;              
+  border-color: #e91ea5;
+}
+
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -281,6 +359,7 @@ export default {
   border: none;
   font-size: 24px;
   cursor: pointer;
+  color: #002241;
 }
 
 .modal-body {
