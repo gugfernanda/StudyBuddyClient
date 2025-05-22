@@ -1,9 +1,13 @@
 <script>
 import AuthService from '../services/AuthService.js';
 import NotificationService from "../services/NotificationService.js";
+import AccountSettingsModal from './AccountSettingsModal.vue';
 
 export default {
     name: "NavBar",
+    components: {
+        AccountSettingsModal
+    },
     data() {
         // const user = JSON.parse(localStorage.getItem("user"));
         // console.log("Local user: ", user)
@@ -12,6 +16,7 @@ export default {
             notifications: [],
             unreadCount: 0,
             userId: null,
+            showAccountModal: false,
         };
     },
     mounted() {
@@ -80,12 +85,20 @@ export default {
                         </div>
                     </div>
                 </div>
-                    <button class="icon-button">
+                    <button class="icon-button" @click="showAccountModal = true">
                         <span class="mdi mdi-account"></span>
                     </button>
             </div>
         </div>
     </header>
+    <!-- la finalul template-ului, dar în același nivel cu <header> -->
+        <AccountSettingsModal
+        v-if="showAccountModal"
+        :user-id="userId"
+        @close="showAccountModal = false"
+        @updated="fetchNotifications()" 
+        />
+
 </template>
 
 <style scoped>

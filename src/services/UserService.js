@@ -30,6 +30,26 @@ const UserService = {
             console.error("Error deleting user:", error);
             throw error;
         }
+    },
+
+    async getUser(id) {
+        try {
+            const response = await axios.get(`${API_URL}/${id}`, { withCredentials: true});
+            return response.data;
+        } catch(error) {
+            console.error("Error getting user:", error);
+            throw error;
+        }
+    },
+
+    async updateUser(id, payload) {
+        try {
+            const response = await axios.put(`${API_URL}/${id}`, payload, {headers: { "Content-Type": "application/json" }});
+            return response.data;
+        } catch(error) {
+            console.error("Error updating user:", error.response?.data || error.message);
+            throw error;
+        }
     }
 };
 
