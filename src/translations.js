@@ -118,7 +118,12 @@ export const translations = {
           friday: "Friday",
           saturday: "Saturday",
           sunday: "Sunday"
-        }
+        },
+        //account settings modal
+        updateProfile: "Update Profile",
+        changePassword: "Change Password",
+        currentPassword: "Current Password",
+        saveAll: "Save All",
     },
     ro: {
         login: "Autentificare",
@@ -238,7 +243,12 @@ export const translations = {
           friday: "Vineri",
           saturday: "Sâmbătă",
           sunday: "Duminică"
-        }
+        },
+        //account settings modal
+        updateProfile: "Actualizează profilul",
+        changePassword: "Schimbă parola",
+        currentPassword: "Parolă curentă",
+        saveAll: "Salvează",
     },
 
   };

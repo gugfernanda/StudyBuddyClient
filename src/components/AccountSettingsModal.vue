@@ -1,5 +1,7 @@
 <script>
 import UserService from '../services/UserService.js'
+import { translations } from "../translations.js";
+import { useLanguage } from "../language.js";
 
 export default {
     name: 'AccountSettingsModal',
@@ -31,14 +33,20 @@ export default {
         };
     },
 
+
     computed: {
+        t() {
+          const {lang} = useLanguage();
+          return translations[lang.value];
+        },
+
         fields() {
             return [
                 { name: 'fullName', label: 'Full Name', editing: this.editing.fullName },
                 { name: 'username', label: 'Username', editing: this.editing.username },
                 { name: 'email', label: 'Email', editing: this.editing.email }
             ];
-        }
+        },
     },
 
     async mounted() {
@@ -124,14 +132,14 @@ export default {
   <div class="modal-backdrop" @click.self="close">
     <div class="modal">
       <header class="modal-header">
-        <h3>Update Profile</h3>
+        <h3>{{ t.updateProfile }}</h3>
         <button class="close-btn" @click="close">&times;</button>
       </header>
       <section class="modal-body">
 
-        <!-- Full Name -->
+        
         <div class="profile-field">
-          <label for="fullName">Full Name</label>
+          <label for="fullName">{{ t.fullName }}</label>
           <span v-if="!editing.fullName" class="field-value">{{ form.fullName }}</span>
           <button v-if="!editing.fullName" class="edit-btn" @click="startEdit('fullName')">
             <i class="mdi mdi-pencil"></i>
@@ -145,7 +153,7 @@ export default {
 
         <!-- Username -->
         <div class="profile-field">
-          <label for="username">Username</label>
+          <label for="username">{{ t.username }}</label>
           <span v-if="!editing.username" class="field-value">{{ form.username }}</span>
           <button v-if="!editing.username" class="edit-btn" @click="startEdit('username')">
             <i class="mdi mdi-pencil"></i>
@@ -159,7 +167,7 @@ export default {
 
         <!-- Email -->
         <div class="profile-field">
-          <label for="email">Email</label>
+          <label for="email">{{ t.email }}</label>
           <span v-if="!editing.email" class="field-value">{{ form.email }}</span>
           <button v-if="!editing.email" class="edit-btn" @click="startEdit('email')">
             <i class="mdi mdi-pencil"></i>
@@ -175,13 +183,13 @@ export default {
 <div class="password-section">
   <div class="password-header" @click="togglePassword">
     <i class="mdi" :class="passwordOpen ? 'mdi-chevron-down' : 'mdi-chevron-right'"></i>
-    <span>Change Password</span>
+    <span>{{ t.changePassword }}</span>
   </div>
   <div v-if="passwordOpen" class="password-fields">
 
     <!-- Current Password -->
     <div class="form-group pw-group">
-      <label for="oldPassword">Current Password</label>
+      <label for="oldPassword">{{ t.currentPassword }}</label>
       <div class="pw-wrapper">
         <input
           id="oldPassword"
@@ -197,7 +205,7 @@ export default {
 
     <!-- New Password -->
     <div class="form-group pw-group">
-      <label for="newPassword">New Password</label>
+      <label for="newPassword">{{ t.newPassword }}</label>
       <div class="pw-wrapper">
         <input
           id="newPassword"
@@ -219,8 +227,8 @@ export default {
 
         <!-- Actions -->
         <div class="form-actions">
-          <button type="button" @click="close">Cancel</button>
-          <button type="button" @click="saveChanges" :disabled="passwordError">Save All</button>
+          <button type="button" @click="close">{{ t.cancel }}</button>
+          <button type="button" @click="saveChanges" :disabled="passwordError">{{ t.saveAll }}</button>
         </div>
 
       </section>
@@ -426,7 +434,6 @@ export default {
   height: 2rem;          /* înălțime fixă */
   margin-left: 5px;     /* să se lipească de input */
   border: 1px solid #ccc;
-  /* border-left: none; */
   border-radius: 0 4px 4px 0;
   display: flex;
   align-items: center;
