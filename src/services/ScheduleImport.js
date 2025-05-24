@@ -21,6 +21,16 @@ const ScheduleImport = {
             console.error("Error deleting manual schedule:", error);
             throw error;
         }
+    },
+
+    async importScheduleByUrl(dto) {
+        try {
+            const response = await axios.post(`${API_URL}/importByUrl`, dto, { withCredentials: true });
+            return response.data;
+        } catch (error) {
+            console.error("Error importing schedule by URL:", error);
+            throw error;
+        }
     }
 }
 

@@ -55,7 +55,17 @@ export default {
                 scheduleLabel: '',
                 startDate: '',
                 repeatUntil: ''
-            }
+            },
+            toggleDropdown: false,
+            importUrl: "",
+            importSheet: "",
+            importGroup: "",
+            importSeries: "",
+            importStart: "",
+            importEnd: "",
+            importTab: 'manual',
+            showDeleteModal: false,
+            deleteLabel: '',
         };
     },
     computed: {
@@ -316,188 +326,346 @@ export default {
             } catch {
                 alert(this.t.importFail)
             }
+        },
+
+        async importScheduleByUrl() {
+            try {
+                const payload = {
+                    url: this.importUrl,
+                    sheetName: this.importSheet,
+                    groupName: this.importGroup,
+                    series: this.importSeries || null,
+                    startDate: this.importStart,
+                    endDate: this.importEnd
+                };
+
+                await ScheduleImport.importScheduleByUrl(payload);
+
+                this.showImportModal = false;
+                this.toggleDropdown = false;
+
+                this.importUrl = "";
+                this.importSheet = "";
+                this.importGroup = "";
+                this.importSeries = "";
+                this.importStart = "";
+                this.importEnd = "";
+
+                await this.fetchEvents();
+                alert(this.t.importSuccess);
+            } catch(e) {
+                alert(this.t.importFail);
+                console.error("Import by URL failed:", e);
+            }
+        },
+
+        closeImportModal() {
+            this.showImportModal = false;
+            this.importTab = 'manual';
+            Object.assign(this.importDto, {
+                title: '', description:'', startTime: '08:00', endTime: '09:00',
+                scheduleLabel: '', startDate: '', repeatUntil: ''
+            })
+            this.importUrl = this.importSheet = this.importGroup = this.importSeries = '';
+            this.importStart = this.importEnd = '';  
+        },
+
+        async deleteScheduleByLabel() {
+            if(!this.deleteLabel.trim()) {
+                alert(this.t.labelEmpty || 'Label required!');
+                return;
+            }
+
+            if(!confirm(this.t.confirmDelete || 'Sigur ștergi?')) return;
+
+            try {
+                await ScheduleImport.deleteManualSchedule(this.deleteLabel);
+                this.showDeleteModal = false;
+                this.deleteLabel = '';
+                await this.fetchEvents();
+                alert(this.t.deleteSuccess || 'Orar șters cu succes!');
+            } catch(e) {
+                alert(this.t.deleteFail || 'Eroare la ștergere!');
+                console.error(e);
+            }
+        },
+
+        closeDeleteModal() {
+            this.showDeleteModal = false;
+            this.deleteLabel = '';
         }
     },
 };
 </script>
 
 <template>
+  <div class="calendar-view">
 
-    <div class="calendar-view">
-
-    <div class="import-header" style="text-align: right; margin-bottom: 1em;">
-        <button class="save-btn" @click="showImportModal = true">
-            {{ t.addSchedule }}
+ 
+    <div class="import-header">
+      <div class="relative inline-block text-left">
+        <button class="save-btn" @click="toggleDropdown = !toggleDropdown">
+          {{ t.addSchedule }}
+          <span :class="{ rotate180: toggleDropdown }">▼</span>
         </button>
-    </div> 
-    
-    <div class="calendar-container">
-        <FullCalendar :options="calendarOptions" />
+
+        <div v-if="toggleDropdown" class="dropdown-box">
+          <button class="dropdown-option"
+                  @click="showImportModal = true; importTab = 'manual'; toggleDropdown = false">
+            + {{ t.addManually }}
+          </button>
+          <button class="dropdown-option"
+                  @click="showImportModal = true; importTab = 'url'; toggleDropdown = false">
+            ⇪ {{ t.importFromUrl }}
+          </button>
+
+          <button class="dropdown-option"
+                @click="showDeleteModal = true; toggleDropdown = false">
+            <i class="mdi mdi-trash-can-outline" style="margin-right:6px"></i> <!-- iconă -->
+            {{ t.deleteByLabel }}
+        </button>
+          
+        </div>
+      </div>
     </div>
 
+    <div class="calendar-container">
+      <FullCalendar :options="calendarOptions" />
+    </div>
+
+
     <div v-if="eventDetails.visible" class="modal-overlay">
-        <div class="modal">
-            <button class="delete-btn" @click="handleDeleteEvent(eventDetails.id)">
-                    <i class="mdi mdi-trash-can-outline"></i>
-            </button>
-            <div class="modal-header">
-                <h2 class="modal-title">{{ eventDetails.title }}</h2>
-                <!-- <button class="delete-btn" @click="handleDeleteEvent(eventDetails.id)">
-                    <i class="mdi mdi-trash-can-outline"></i>
-                </button> -->
-                
-            </div>
-                
-            
-            <p><strong>{{ t.start }}:</strong> {{ eventDetails.start }}</p>
-            <p><strong>{{ t.end }}:</strong> {{ eventDetails.end }}</p>
-            <p><strong>{{ t.description }}:</strong> {{ eventDetails.description }}</p>
-            <div class="button-container">
-                <button class="edit-btn" @click="openEditModal">{{ t.edit }}</button>
-                <button class="close-btn" @click="eventDetails.visible = false">{{ t.cancel }}</button>
-            </div>
+      <div class="modal">
+        <button class="delete-btn" @click="handleDeleteEvent(eventDetails.id)">
+          <i class="mdi mdi-trash-can-outline" />
+        </button>
 
-
+        <div class="modal-header">
+          <h2 class="modal-title">{{ eventDetails.title }}</h2>
         </div>
+
+        <p><strong>{{ t.start }}:</strong> {{ eventDetails.start }}</p>
+        <p><strong>{{ t.end   }}:</strong> {{ eventDetails.end   }}</p>
+        <p><strong>{{ t.description }}:</strong> {{ eventDetails.description }}</p>
+
+        <div class="button-container">
+          <button class="edit-btn"  @click="openEditModal">{{ t.edit }}</button>
+          <button class="close-btn" @click="eventDetails.visible = false">{{ t.cancel }}</button>
+        </div>
+      </div>
     </div>
 
     <div v-if="showEditModal" class="modal-overlay">
-        <div class="modal">
-            <h2>{{ t.edit }}</h2>
+      <div class="modal">
+        <h2>{{ t.edit }}</h2>
 
-            <input v-model="editedEvent.title" type="text" placeholder="Event Title" />
-            <textarea v-model="editedEvent.description" placeholder="Event Description"></textarea>
+        <input v-model="editedEvent.title"       type="text" placeholder="Event Title" />
+        <textarea v-model="editedEvent.description" placeholder="Event Description" />
 
-            <div class="time-picker">
-                <label for="edit-start">{{ t.start }}</label>
-                <div class="date-time-container">
-                    <input type="datetime-local" id="edit-start" v-model="editedEvent.startTime" />
-                </div>
-            </div>
+        <div class="time-picker">
+          <label>{{ t.start }}</label>
+          <input type="datetime-local" v-model="editedEvent.startTime" />
+        </div>
 
-            <div class="time-picker">
-                <label for="edit-end">{{ t.end }}</label>
-                <div class="date-time-container">
-                    <input type="datetime-local" id="edit-end" v-model="editedEvent.endTime" />
-                </div>
-            </div>
+        <div class="time-picker">
+          <label>{{ t.end }}</label>
+          <input type="datetime-local" v-model="editedEvent.endTime" />
+        </div>
 
-            <button class="save-btn" @click="updateEvent">{{ t.save }}</button>
-            <button class="cancel-btn" @click="showEditModal = false">{{ t.cancel }}</button>
+        <button class="save-btn"   @click="updateEvent">{{ t.save   }}</button>
+        <button class="cancel-btn" @click="showEditModal = false">{{ t.cancel }}</button>
+      </div>
+    </div>
+
+    <div v-if="showDeleteModal" class="modal-overlay"> 
+        <div class="modal" style="width:320px">           
+            <h2>{{ t.deleteByLabel }}</h2> 
+
+            <input v-model="deleteLabel"                  
+                    type="text"
+                    :placeholder="t.scheduleLabel"/>
+
+            <button class="save-btn" @click="deleteScheduleByLabel"> 
+                {{ t.delete || 'Șterge' }}
+            </button>
+            <button class="cancel-btn" @click="closeDeleteModal">    
+                {{ t.cancel }}
+            </button>
         </div>
     </div>
 
-
-
     <div v-if="showModal" class="modal-overlay">
-        <div class="modal">
-            <h2>{{ t.addEvent }}</h2>
+      <div class="modal">
+        <h2>{{ t.addEvent }}</h2>
 
-            <input v-model="newEventTitle" type="text" placeholder="Event Title" />
+        <input    v-model="newEventTitle"       type="text" placeholder="Event Title" />
+        <textarea v-model="newEventDescription"             placeholder="Event Description" />
 
-            <textarea v-model="newEventDescription" placeholder="Event Description"></textarea>
-
-            <div class="time-picker">
-                <label for="start-date">{{ t.start }}</label>
-                <div class="date-time-container">
-                    <input type="date" id="start-date" v-model="newEventStartDate"/>
-                    <input type="time" v-model="newEventStartTime"/>
-                </div>
-            </div>
-
-            <div class="time-picker">
-                <label for="end-date">{{ t.end }}</label>
-                <div class="date-time-container">
-                    <input type="date" id="end-date" v-model="newEventEndDate"/>
-                    <input type="time" v-model="newEventEndTime"/>
-                </div>
-            </div>
-
-            <button class="save-btn" @click="addEvent">{{ t.save }}</button>
-            <button class="cancel-btn" @click="showModal = false">{{ t.cancel }}</button>
+        <div class="time-picker">
+          <label>{{ t.start }}</label>
+          <input type="date" v-model="newEventStartDate" />
+          <input type="time" v-model="newEventStartTime" />
         </div>
 
+        <div class="time-picker">
+          <label>{{ t.end }}</label>
+          <input type="date" v-model="newEventEndDate" />
+          <input type="time" v-model="newEventEndTime" />
+        </div>
+
+        <button class="save-btn"   @click="addEvent">{{ t.save   }}</button>
+        <button class="cancel-btn" @click="showModal = false">{{ t.cancel }}</button>
+      </div>
     </div>
 
     <div v-if="showImportModal" class="modal-overlay import-modal-overlay">
-        <div class="modal import-modal" style="width: 400px;">
-            <h2>{{ t.addManualSchedule }}</h2>
-
-            <input v-model="importDto.title" type="text" :placeholder="t.title" />
-            <textarea v-model="importDto.description" :placeholder="t.description"></textarea>
-
-            <div class="form-row-inline">
-                <label for="day-of-week">{{ t.dayOfWeek }}</label>
-                <select
-                    id="day-of-week"
-                    v-model="importDto.dayOfWeek"
-                    class="form-input"
-                    >
-                    <option
-                        v-for="d in ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY']"
-                        :key="d"
-                        :value="d"
-                        >
-                    {{ t.days[d.toLowerCase()] }}
-                    </option>
-                </select>
-            </div>
-
-            <div class="time-picker">
-                <label>{{ t.start }}</label>
-                <input type="time" v-model="importDto.startTime" />
-            </div>
-
-            <div class="time-picker">
-                <label>{{ t.end }}</label>
-                <input type="time" v-model="importDto.endTime" />
-            </div>
-
-            <div class="schedule-label-container">
-                <input
-                    v-model="importDto.scheduleLabel"
-                    type="text"
-                    :placeholder="t.scheduleLabel"
-                    class="form-control"
-                />
-                <span class="help-icon">?</span>
-                <div class="tooltip-box">
-                    {{ t.scheduleLabelHelp }}
-                </div>
-            </div>
+      <div class="modal import-modal">
 
 
-            <div class="form-row">
-                <label for="start-semester">{{ t.startDate }}</label>
-                <input id="start-semester" 
-                        v-model="importDto.startDate" 
-                        type="date" 
-                        class="date-input" />
-            </div>
-
-            <div class="form-row">
-                <label for="end-semester">{{ t.repeatUntil }}</label>
-                <input id="end-semester" 
-                        v-model="importDto.repeatUntil" 
-                        type="date" 
-                        class="date-input" />
-            </div>
-
-
-            <button class="save-btn" @click="importManualSchedule">{{ t.import }}</button>
-            <button class="cancel-btn" @click="showImportModal = false">{{ t.cancel }}</button>
-
-
+        <div class="tab-header">
+          <button :class="{ active: importTab === 'manual' }"
+                  @click="importTab = 'manual'">
+            {{ t.addManualSchedule }}
+          </button>
+          <button :class="{ active: importTab === 'url' }"
+                  @click="importTab = 'url'">
+            {{ t.importFromUrl }}
+          </button>
         </div>
 
-    </div>
-    </div>
+        <div v-show="importTab === 'manual'">
 
+          <input v-model="importDto.title"       type="text"    :placeholder="t.title" />
+          <textarea v-model="importDto.description"             :placeholder="t.description" />
+
+          <div class="form-row-inline">
+            <label>{{ t.dayOfWeek }}</label>
+            <select v-model="importDto.dayOfWeek" class="form-input">
+              <option v-for="d in ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY']"
+                      :key="d" :value="d">
+                {{ t.days[d.toLowerCase()] }}
+              </option>
+            </select>
+          </div>
+
+          <div class="time-picker">
+            <label>{{ t.start }}</label>
+            <input type="time" v-model="importDto.startTime" />
+          </div>
+          <div class="time-picker">
+            <label>{{ t.end }}</label>
+            <input type="time" v-model="importDto.endTime" />
+          </div>
+
+          <div class="schedule-label-container">
+            <input v-model="importDto.scheduleLabel"
+                   type="text"  :placeholder="t.scheduleLabel"
+                   class="form-control" />
+            <span class="help-icon">?</span>
+            <div class="tooltip-box">{{ t.scheduleLabelHelp }}</div>
+          </div>
+
+          <div class="form-row">
+            <label>{{ t.startDate }}</label>
+            <input type="date" v-model="importDto.startDate" class="date-input" />
+          </div>
+          <div class="form-row">
+            <label>{{ t.repeatUntil }}</label>
+            <input type="date" v-model="importDto.repeatUntil" class="date-input" />
+          </div>
+
+          <button class="save-btn" @click="importManualSchedule">
+            {{ t.import }}
+          </button>
+        </div>
+
+
+        <div v-show="importTab === 'url'">
+          <input v-model="importUrl"    type="text" placeholder="Google Sheets URL" />
+          <input v-model="importSheet"  type="text" placeholder="Sheet name" />
+          <input v-model="importGroup"  type="text" placeholder="Group" />
+          <input v-model="importSeries" type="text" placeholder="Series (optional)" />
+
+          <div class="form-row">
+            <label>{{ t.startDate }}</label>
+            <input type="date" v-model="importStart" class="date-input" />
+          </div>
+          <div class="form-row">
+            <label>{{ t.repeatUntil }}</label>
+            <input type="date" v-model="importEnd" class="date-input" />
+          </div>
+
+          <button class="save-btn" @click="importScheduleByUrl">
+            {{ t.import }}
+          </button>
+        </div>
+
+        <button class="cancel-btn" @click="closeImportModal">
+          {{ t.cancel }}
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 
 
 <style scoped>
+
+.rotate180{ 
+    transform:rotate(180deg);
+}
+
+.dropdown-box {
+  position: absolute;
+  right: 0;
+  margin-top: 4px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  z-index: 1000;
+  width: 200px;
+}
+
+.tab-header {
+  display: flex;
+  justify-content: center; 
+  gap: .5rem; 
+  margin-bottom: 1rem;
+}
+
+.tab-header button {
+  flex: 1;
+  padding:8px 0; 
+  background: #eee; 
+  border: none; 
+  cursor: pointer;
+  font-weight: 600; 
+  border-radius: 6px 6px 0 0;
+}
+
+.tab-header button.active {
+    background:#e91ea5; 
+    color:#fff;
+}
+
+
+.dropdown-option {
+  width: 100%;
+  text-align: left;
+  padding: 10px 16px;
+  background: white;
+  color: #002241;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+}
+
+.dropdown-option:hover {
+  background-color: #f3f3f3;
+}
+
 
 .form-row-inline {
   display: flex;
@@ -634,7 +802,7 @@ export default {
   padding: 20px;
   border-radius: 10px;
   text-align: center;
-  width: 350px;
+  width: 500px;
   box-sizing: border-box;
 }
 
@@ -855,7 +1023,7 @@ button {
     position: relative;
     background: white;
     padding: 20px;
-    width: 350px;
+    width: 400px;
     border-radius: 10px;
     text-align: center;
 }
