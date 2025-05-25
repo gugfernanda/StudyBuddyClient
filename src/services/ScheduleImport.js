@@ -15,7 +15,7 @@ const ScheduleImport = {
     
     async deleteManualSchedule(label) {
         try {
-            const response = await axios.delete(`${API_URL}/clear`, { params: {label}, withCredentials: true});
+            const response = await axios.delete(`${API_URL}/label/${label}`, { params: {label}, withCredentials: true});
             return response.data;
         } catch(error) {
             console.error("Error deleting manual schedule:", error);

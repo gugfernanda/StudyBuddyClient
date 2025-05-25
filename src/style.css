@@ -79,7 +79,7 @@ button:focus-visible {
 } */
 
 
-/* 🔹 Resetare globală pentru eliminarea marginilor implicite */
+
 * {
   margin: 0;
   padding: 0;
@@ -87,7 +87,7 @@ button:focus-visible {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
 
-/* 🔹 Setări generale */
+
 html, body {
   height: 100%;
   width: 100%;
@@ -96,14 +96,14 @@ html, body {
   overflow-x: hidden;
 }
 
-/* 🔹 Asigură că aplicația ocupă tot spațiul */
+
 .app-container {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-/* 🔹 Elimină sidebar-ul albastru unde nu trebuie */
+
 .DashboardView .container,
 .UsersView .container {
   display: block;
@@ -114,7 +114,7 @@ html, body {
   display: none;
 }
 
-/* 🔹 Stil pentru text și butoane */
+
 h1 {
   font-size: 2.5rem;
   font-weight: bold;
@@ -142,7 +142,7 @@ button:active {
   transform: scale(0.95);
 }
 
-/* 🔹 Linkuri */
+
 a {
   text-decoration: none;
   font-weight: 500;
@@ -153,7 +153,7 @@ a:hover {
   color: #535bf2;
 }
 
-/* 🔹 Container pentru autentificare (login & sign up) */
+
 .auth-container {
   display: flex;
   justify-content: center;
@@ -175,7 +175,7 @@ a:hover {
   color: #002241;
 }
 
-/* 🔹 Input field styling */
+
 input {
   width: 100%;
   padding: 10px;
@@ -194,7 +194,7 @@ input:focus {
   box-shadow: 0px 0px 5px rgba(233, 30, 99, 0.5);
 }
 
-/* 🔹 Container pentru parole cu iconiță */
+
 .password-container {
   position: relative;
   display: flex;
@@ -218,7 +218,7 @@ input:focus {
   color: #555;
 }
 
-/* 🔹 Mesaje de eroare și succes */
+
 .error-message {
   color: red;
   margin-top: 10px;
@@ -231,7 +231,7 @@ input:focus {
   font-size: 14px;
 }
 
-/* 🔹 Dashboard */
+
 .dashboard-container {
   display: flex;
   height: 100vh;
@@ -243,7 +243,7 @@ input:focus {
   background-color: #f4f4f4;
 }
 
-/* 🔹 Sidebar */
+
 .sidebar {
   width: 250px;
   background-color: #002241;
@@ -279,7 +279,7 @@ input:focus {
   font-weight: bold;
 }
 
-/* 🔹 Navbar */
+
 .navbar {
   width: 100%;
   background-color: white;
