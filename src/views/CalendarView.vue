@@ -26,6 +26,7 @@ export default {
             description: "",
             start: "",
             end: "",
+            scheduleLabel: "",
             visible: false
             },
             newEventTitle: "",
@@ -120,20 +121,37 @@ export default {
                 const eventsFromServer = await EventService.getUserEvents(this.username);
                 //console.log("Fetched events:", eventsFromServer); // Debugging
 
-                this.events = eventsFromServer.map(event => ({
-                    title: event.title,
-                    start: event.startTime ? new Date(event.startTime) : null,
-                    end: event.endTime ? new Date(event.endTime) : null, 
-                    id: event.id,
-                    extendedProps: {
-                        description: event.description
-                    }
+                // this.events = eventsFromServer.map(event => ({
+                //     title: event.title,
+                //     start: event.startTime ? new Date(event.startTime) : null,
+                //     end: event.endTime ? new Date(event.endTime) : null, 
+                //     id: event.id,
+                //     extendedProps: {
+                //         description: event.description,
+                //         scheduleLabel: event.scheduleLabel
+                //     }
+                // }));
+
+                // console.log('events mapped', this.events);
+
+                // this.calendarOptions = {
+                //     ...this.calendarOptions,
+                //     events: [...this.events] 
+                // };
+
+                const plainEvents = eventsFromServer.map(event => ({
+                  title: event.title,
+                  start: event.startTime,
+                  end: event.endTime,
+                  id: event.id,
+                  extendedProps: {
+                    description: event.description,
+                    scheduleLabel: event.scheduleLabel
+                  }
                 }));
 
-                this.calendarOptions = {
-                    ...this.calendarOptions,
-                    events: [...this.events] 
-                };
+                this.calendarOptions.events = plainEvents;
+                this.events = plainEvents;
 
                 } catch (error) {
                     console.error("Error fetching events:", error);
@@ -155,6 +173,7 @@ export default {
                 id: info.event.id || null,
                 title: info.event.title,
                 description: info.event.extendedProps?.description || "No description available",
+                scheduleLabel: info.event.extendedProps?.scheduleLabel || '',
                 start: info.event.start ? info.event.start.toLocaleString() : "Unknown",
                 end: info.event.end ? info.event.end.toLocaleString() : "Unknown",
                 visible: true
@@ -224,7 +243,7 @@ export default {
             try {
                 await EventService.deleteEvent(eventId);
                 this.events = this.events.filter(event => event.id !== eventId);
-                this.calendarOptions.events = { ...this.calendarOptions, events: [...this.events] };
+                this.calendarOptions.events = [...this.events];
                 this.eventDetails.visible = false;
             } catch(error) {
                 console.error("Error deleting event:", error);
@@ -257,10 +276,13 @@ export default {
                     start: new Date(createdEvent.startTime),
                     end: new Date(createdEvent.endTime),
                     id: createdEvent.id,
-                    extendedProps: { description: createdEvent.description }
+                    extendedProps: { 
+                      description: createdEvent.description,
+                      scheduleLabel: createdEvent.scheduleLabel
+                     }
                 });
 
-                this.calendarOptions.events = {...this.calendarOptions, events: [...this.events]};
+                this.calendarOptions.events = [...this.events];
                 this.showModal = false;
                 this.newEventTitle = "";
                 this.newEventDescription = "";
@@ -299,7 +321,7 @@ export default {
                         };
                     }
 
-                    this.calendarOptions.events = {...this.calendarOptions, events: [...this.events]};
+                    this.calendarOptions.events =[...this.events];
                     this.showEditModal = false;
                 } catch(error) {
                     console.error("Error updating event:", error);
@@ -406,7 +428,7 @@ export default {
       <div class="relative inline-block text-left">
         <button class="save-btn" @click="toggleDropdown = !toggleDropdown">
           {{ t.addSchedule }}
-          <span :class="{ rotate180: toggleDropdown }">▼</span>
+          <span class="arrow" :class="{ rotate180: toggleDropdown }">▼</span>
         </button>
 
         <div v-if="toggleDropdown" class="dropdown-box">
@@ -447,6 +469,10 @@ export default {
         <p><strong>{{ t.start }}:</strong> {{ eventDetails.start }}</p>
         <p><strong>{{ t.end   }}:</strong> {{ eventDetails.end   }}</p>
         <p><strong>{{ t.description }}:</strong> {{ eventDetails.description }}</p>
+        <p v-if="eventDetails.scheduleLabel">
+          <strong>{{ t.scheduleLabel }}:</strong>
+          {{ eventDetails.scheduleLabel }}
+        </p>
 
         <div class="button-container">
           <button class="edit-btn"  @click="openEditModal">{{ t.edit }}</button>
@@ -581,10 +607,10 @@ export default {
 
 
         <div v-show="importTab === 'url'">
-          <input v-model="importUrl"    type="text" placeholder="Google Sheets URL" />
-          <input v-model="importSheet"  type="text" placeholder="Sheet name" />
-          <input v-model="importGroup"  type="text" placeholder="Group" />
-          <input v-model="importSeries" type="text" placeholder="Series (optional)" />
+          <input v-model="importUrl"    type="text" :placeholder=t.googleSheetsUrl />
+          <input v-model="importSheet"  type="text" :placeholder=t.sheetName />
+          <input v-model="importGroup"  type="text" :placeholder=t.group />
+          <input v-model="importSeries" type="text" :placeholder=t.series />
 
           <div class="form-row">
             <label>{{ t.startDate }}</label>
@@ -612,7 +638,12 @@ export default {
 
 <style scoped>
 
-.rotate180{ 
+.arrow {
+  display:inline-block;       
+  transition:transform .25s;    
+}
+
+.rotate180 {  
     transform:rotate(180deg);
 }
 
@@ -691,7 +722,8 @@ export default {
 
 
 .form-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 180px 1fr; 
   align-items: center;
   margin-bottom: 1rem;
 }
@@ -769,7 +801,7 @@ export default {
 }
 
 .import-header .save-btn {
-  background-color: #e91ea5;       /* sau aceeași culoare ca today (#e91ea5) */
+  background-color: #e91ea5;       
   color: white;
   width: auto !important;          
   padding: 6px 12px !important;    
@@ -795,6 +827,16 @@ export default {
 
 }
 
+.modal {
+    position: relative;
+    background: white;
+    padding: 20px;
+    width: 350px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+
 .import-modal {
   max-height: 90vh;
   overflow-y: auto;
@@ -802,7 +844,7 @@ export default {
   padding: 20px;
   border-radius: 10px;
   text-align: center;
-  width: 500px;
+  width: 400px;
   box-sizing: border-box;
 }
 
@@ -1019,14 +1061,6 @@ button {
     text-align: center;
 }
 
-.modal {
-    position: relative;
-    background: white;
-    padding: 20px;
-    width: 400px;
-    border-radius: 10px;
-    text-align: center;
-}
 
 
 
