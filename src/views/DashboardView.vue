@@ -341,7 +341,6 @@ export default {
 }
 
 .deadline-label {
-    /*flex-shrink: 0;*/
     width: 150px;
     font-size: 15px;
     color: #555;

@@ -30,8 +30,6 @@ export default {
                 const user = await AuthService.login(this.emailOrUsername, this.password);
 
                 if(user) {
-                    //console.log("User logged in:", user);
-                    //alert("Login successful!");
                     this.$router.push('/dashboard');
                 } else {
                     this.errorMessage = this.t.errorInvalid;
@@ -39,7 +37,7 @@ export default {
                 
             } catch (error) {
                 if (error.response && error.response.data.error) {
-                    this.errorMessage = error.response.data.error; // Extrage doar mesajul de eroare
+                    this.errorMessage = error.response.data.error;
                 } else {
                     this.errorMessage = this.t.errorGeneric;
                 }           

@@ -1,6 +1,7 @@
 
 export const translations = {
     en: {
+        noNotifs: "No notifications",
         login: "Login",
         usernameOrEmail: "Username or Email",
         password: "Password",
@@ -126,11 +127,13 @@ export const translations = {
         confirmDelete : 'Are you sure you want to delete all events with this label?',
         deleteSuccess : 'Schedule was successfully deleted!',
         deleteFail    : 'An error occurred while deleting the schedule!',
+        delete: 'Delete',
         googleSheetsUrl: 'Google Sheets URL',
         sheetName: 'Sheet Name',
         group: 'Group',
         series: 'Series (optional)',
         scheduleLabel: 'Label',
+        importUrl: "Import schedule",
         //account settings modal
         updateProfile: "Update Profile",
         changePassword: "Change Password",
@@ -138,6 +141,7 @@ export const translations = {
         saveAll: "Save All",
     },
     ro: {
+        noNotifs: "Nu sunt notificări",
         login: "Autentificare",
         usernameOrEmail: "Nume de utilizator sau Email",
         password: "Parolă",
@@ -263,11 +267,13 @@ export const translations = {
         confirmDelete : 'Ești sigur că vrei să ștergi toate evenimentele cu acest label?',
         deleteSuccess : 'Orarul a fost șters!',
         deleteFail    : 'A apărut o eroare la ștergerea orarului!',
+        delete: 'Șterge',
         googleSheetsUrl: 'URL-ul Google Sheets',
         sheetName: 'Numele Sheet-ului',
         group: 'Grupa',
         series: 'Seria (opțional)',
         scheduleLabel: 'Etichetă',
+        importUrl: "Importă orarul",
         //account settings modal
         updateProfile: "Actualizează profilul",
         changePassword: "Schimbă parola",

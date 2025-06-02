@@ -115,30 +115,7 @@ export default {
                     console.warn("No username found, skipping fetch.");
                     return;
                 }
-
-                //console.log("Fetching events for:", this.username); // Debugging
-
                 const eventsFromServer = await EventService.getUserEvents(this.username);
-                //console.log("Fetched events:", eventsFromServer); // Debugging
-
-                // this.events = eventsFromServer.map(event => ({
-                //     title: event.title,
-                //     start: event.startTime ? new Date(event.startTime) : null,
-                //     end: event.endTime ? new Date(event.endTime) : null, 
-                //     id: event.id,
-                //     extendedProps: {
-                //         description: event.description,
-                //         scheduleLabel: event.scheduleLabel
-                //     }
-                // }));
-
-                // console.log('events mapped', this.events);
-
-                // this.calendarOptions = {
-                //     ...this.calendarOptions,
-                //     events: [...this.events] 
-                // };
-
                 const plainEvents = eventsFromServer.map(event => ({
                   title: event.title,
                   start: event.startTime,
@@ -622,7 +599,7 @@ export default {
           </div>
 
           <button class="save-btn" @click="importScheduleByUrl">
-            {{ t.import }}
+            {{ t.importUrl }}
           </button>
         </div>
 
@@ -989,7 +966,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     width: 100%;
 }
 
@@ -1001,13 +978,13 @@ export default {
 
 .date-time-container {
     display: flex;
-    gap: 10px; 
+    gap: 8px; 
     flex: 1;
 }
 
 .date-time-container input {
     flex: 1;
-    padding: 8px;
+    padding: 5px;
     border: 1px solid #ccc;
     border-radius: 5px;
 }

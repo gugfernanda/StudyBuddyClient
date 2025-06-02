@@ -41,7 +41,7 @@ export default {
                 this.unreadCount = await NotificationService.getUnreadCount(this.userId);
                 //console.log("✅ Notifications:", this.notifications);
             } catch(error) {
-                console.error("Faiked to load notifications", error);
+                console.error("Failed to load notifications", error);
             }
         },
 
@@ -69,7 +69,7 @@ export default {
    <header class="navbar">
         <div class="title">Study Buddy</div>
         <div class="user-actions">
-            <input type="text" placeholder="Search..." class="search-bar">
+            <!-- <input type="text" placeholder="Search..." class="search-bar"> -->
             <div class="icons-container">
                 <div class="notification-wrapper">
                 

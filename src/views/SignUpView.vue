@@ -27,10 +27,8 @@ export default {
     },
     methods: {
         async register () {
-
             this.errorMessage = "";
             this.successMessage = "";
-
             if(this.password.length < 8) {
                 this.errorMessage = this.t.passwordTooShort;
                 return;
@@ -47,16 +45,12 @@ export default {
                 this.errorMessage = this.t.passwordsNoSpecial;
                 return;
             }
-
             if(this.password !== this.confirmPassword) {
                 this.errorMessage = this.t.passwordsDontMatch;
                 return;
             }
-
             try {
                 const user = await AuthService.register(this.username, this.fullName, this.email, this.password);
-
-                console.log("User registered:", user);
 
                 this.successMessage = this.t.signupSuccess;
                 this.username = "";
