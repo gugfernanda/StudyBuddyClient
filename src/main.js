@@ -4,6 +4,7 @@ import "@mdi/font/css/materialdesignicons.min.css";
 import App from './App.vue'
 import router from './router/index.js';
 import axios from "axios";
+import { initPush } from './services/push.js';
 
 axios.interceptors.response.use(
     response => response,
@@ -22,3 +23,5 @@ axios.interceptors.response.use(
 const app = createApp(App);
 app.use(router);
 app.mount('#app');
+
+initPush();
