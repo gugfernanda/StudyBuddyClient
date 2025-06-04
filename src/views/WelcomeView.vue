@@ -1,6 +1,7 @@
 <script>
 
 import AuthService from "../services/AuthService.js";
+import UserService from "../services/UserService.js";
 import { translations } from "../translations.js";
 import { useLanguage } from "../language.js";
 
@@ -26,11 +27,19 @@ export default {
     },
     methods: {
         async login() {
+            this.errorMessage = "";
             try {
                 const user = await AuthService.login(this.emailOrUsername, this.password);
+                //console.log("[WelcomeView] Rezultat AuthService.login:", user);
 
                 if(user) {
+                    //console.log("[WelcomeView] user.username =", user.username, "lang =", lang.value);
+                    UserService.setLanguage(user.username, lang.value)
+                        .then(() => console.log("[WelcomeView] setLanguage OK"))
+                        .catch(err => console.warn("[WelcomeView] setLanguage ERR:", err.response?.data || err.message));
+
                     this.$router.push('/dashboard');
+                    return;
                 } else {
                     this.errorMessage = this.t.errorInvalid;
                 }

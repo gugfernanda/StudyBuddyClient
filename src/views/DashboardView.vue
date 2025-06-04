@@ -8,6 +8,7 @@ import PomodoroView from "../views/PomodoroView.vue";
 import CalendarView from "../views/CalendarView.vue";
 import { translations } from "../translations.js";
 import { useLanguage } from "../language.js";
+import { initPush } from "../services/push.js";  
 
 const { lang } = useLanguage();
 
@@ -204,10 +205,6 @@ export default {
 
                 if(user && user.username) {
                     this.username = user.username;
-
-                    //console.log("Username set:", this.username);
-                    //console.log("Calling fetchTasks()...");
-
                     await this.fetchTasks();
                 } else {
 
@@ -218,7 +215,11 @@ export default {
                 this.errorMessage = this.t.errorRetrieveUser;
                 console.error(error);
             }
-        }
+        },
+
+        mounted() {
+            initPush();
+        },
 
     };
 </script>

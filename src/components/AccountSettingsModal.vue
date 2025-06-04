@@ -83,8 +83,19 @@ export default {
             this.original[field] = this.form[field];
             this.editing[field] = false;
         },
-        switchLang(code) {
+        // switchLang(code) {
+        //   this.setLang(code);
+        // },
+        async switchLang(code) {
+
           this.setLang(code);
+
+          try {
+            await UserService.setLanguage(this.form.username, code);
+            console.log('Language set on the backend: ${code}');
+          } catch(err) {
+            console.error("Error saving backend language:", err);
+          }
         },
         togglePassword() {
             this.passwordOpen = !this.passwordOpen;

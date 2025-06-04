@@ -50,6 +50,18 @@ const UserService = {
             console.error("Error updating user:", error.response?.data || error.message);
             throw error;
         }
+    },
+
+    async setLanguage(username, languageCode) {
+        try {
+            await axios.put(`${API_URL}/${encodeURIComponent(username)}/language`,
+                { language: languageCode },
+                {headers: { "Content-Type": "application/json" } }
+            );
+        } catch (error) {
+            console.error("Error setting language:",  error.response?.data || error.message);
+            throw error;
+        }
     }
 };
 
