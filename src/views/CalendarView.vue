@@ -154,7 +154,6 @@ export default {
                 start: info.event.start ? info.event.start.toLocaleString() : "Unknown",
                 end: info.event.end ? info.event.end.toLocaleString() : "Unknown",
                 visible: true
-
             };
         },
 
@@ -167,45 +166,35 @@ export default {
 
             //console.log("Editing event:", this.eventDetails);
 
-            const formatDateTime = (dateString) => {
-                //console.log("Original date value:", dateString); 
-
-                if (!dateString || dateString === "Unknown" || dateString === undefined) return "";
+            const formatIsoToLocal = (toLocaleStringValue) => {
+               if (!toLocaleStringValue || toLocaleStringValue === "Unknown") {
+                  return "";
+                }
 
                 try {
-                    const dateParts = dateString.split(", ")[0].split("/"); 
-                    const timePart = dateString.split(", ")[1];
+                  const [datePart, timePart] = toLocaleStringValue.split(", ");
+                  const parsedDate = new Date(toLocaleStringValue);
 
-                    if (dateParts.length !== 3 || !timePart) {
-                        console.error("Invalid date format:", dateString);
-                        return "";
-                    }
-
-                    const formattedDateString = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}T${timePart}`;
-
-                    //console.log("Formatted date string:", formattedDateString);
-
-                    const d = new Date(formattedDateString);
-
-                    if (isNaN(d.getTime())) {
-                        console.error("Invalid date:", formattedDateString);
-                        return "";
-                    }
-                    const localDate = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
-                    
-                    return localDate.toISOString().slice(0, 16);
-                } catch (error) {
-                    console.error("Error formatting date:", error);
+                  if (isNaN(parsedDate.getTime())) {
+                    console.error("Could not parse date:", toLocaleStringValue);
                     return "";
+                  }
+
+                  const tzOffsetMs = parsedDate.getTimezoneOffset() * 60000;
+                  const localDate = new Date(parsedDate.getTime() - tzOffsetMs);
+                  return localDate.toISOString().slice(0, 16);
+                } catch (e) {
+                  console.error("Error formatting to ISO:", e);
+                  return "";
                 }
-            };
+             };
 
             this.editedEvent = {
                 id: this.eventDetails.id,
                 title: this.eventDetails.title || "",
                 description: this.eventDetails.description || "",
-                startTime: formatDateTime(this.eventDetails.start),
-                endTime: formatDateTime(this.eventDetails.end)
+                startTime: formatIsoToLocal(this.eventDetails.start),
+                endTime: formatIsoToLocal(this.eventDetails.end)
             };
 
             //console.log("Formatted event:", this.editedEvent);
@@ -275,12 +264,14 @@ export default {
                     return;
                 }
 
-                const updatedEvent = await EventService.updateEvent(this.editedEvent.id, {
-                    title: this.editedEvent.title,
-                    description: this.editedEvent.description,
-                    startTime: this.editedEvent.startTime,
-                    endTime: this.editedEvent.endTime
-                });
+                const payload = {
+                  title: this.editedEvent.title,
+                  description: this.editedEvent.description,
+                  startTime: this.editedEvent.startTime,
+                  endTime: this.editedEvent.endTime
+                };
+
+                const updatedEvent = await EventService.updateEvent(this.editedEvent.id, payload);
 
                 if (!updatedEvent || !updatedEvent.id) {
                     console.error("Update failed, no event data received.");
@@ -292,8 +283,8 @@ export default {
                     this.events[index] = {
                             ...this.events[index],
                             title: updatedEvent.title,
-                            start: updatedEvent.startTime,
-                            end: updatedEvent.endTime,
+                            start: new Date(updatedEvent.startTime),
+                            end: new Date(updatedEvent.endTime),
                             extendedProps: { description: updatedEvent.description }
                         };
                     }
