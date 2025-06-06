@@ -29,6 +29,10 @@ export default {
             this.changeSection("calendar");
             //this.$emit("calendar");
         },
+        async handleStatsClick() {
+            this.changeSection("stats");
+            this.$router.push("/stats");
+        },
         async logout() {
             try {
                 await AuthService.logout();
@@ -52,17 +56,14 @@ export default {
                 <li @click="handleTasksClick" :class="{ active: currentSection === 'tasks' }">
                     <span class="mdi mdi-format-list-bulleted"></span> {{ t.myTasks }}
                 </li>
-                <!-- <li @click="changeSection('completed')" :class="{ active: currentSection === 'completed' }">
-                    <span class="mdi mdi-check-circle"></span> Completed
+                <li @click="changeSection('calendar')" :class="{ active: currentSection === 'calendar'}">
+                    <span class="mdi mdi-calendar-month"></span> {{ t.academicCalendar }}
                 </li>
-                <li @click="changeSection('categories')" :class="{ active: currentSection === 'categories'}">
-                    <span class="mdi mdi-folder"></span> Categories
-                </li> -->
                 <li @click="changeSection('pomodoro')" :class="{ active: currentSection === 'pomodoro'}">
                     <span class="mdi mdi-timer"></span> {{ t.pomodoroTimer }}
                 </li>
-                <li @click="changeSection('calendar')" :class="{ active: currentSection === 'calendar'}">
-                    <span class="mdi mdi-calendar-month"></span> {{ t.academicCalendar }}
+                <li @click="handleStatsClick" :class="{ active: currentSection === 'stats' }">
+                    <span class="mdi mdi-chart-bar"></span> {{ t.stats }}
                 </li>
                 <li class="logout" @click="logout">
                     <span class="mdi mdi-logout"></span> {{ t.logout }}

@@ -195,6 +195,17 @@ export default {
 
 
         async created() {
+
+            const requestedSection = this.$route.query.section;
+
+            if(requestedSection === "tasks" || requestedSection === "calendar") {
+                this.currentSection = requestedSection;
+
+                if(requestedSection === "tasks") {
+                    this.loading = true;
+                }
+            }
+
             try {
 
                 //console.log("Calling getCurrentUser() on page load...");
@@ -214,6 +225,17 @@ export default {
             } catch (error) {
                 this.errorMessage = this.t.errorRetrieveUser;
                 console.error(error);
+            }
+        },
+
+        watch: {
+            '$route.query.section'(newSection) {
+                if(newSection === "tasks" || newSection === "calendar") {
+                    this.currentSection = newSection;
+                    if(newSection === "tasks") {
+                        this.fetchTasks();
+                    }
+                }
             }
         },
 

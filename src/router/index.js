@@ -5,6 +5,7 @@ import DashboardView from "../views/DashboardView.vue";
 import PomodoroView from '../views/PomodoroView.vue';
 import ForgotPasswordView from '../views/ForgotPasswordView.vue';
 import ResetPasswordView from '../views/ResetPasswordView.vue';
+import StatsView from '../views/StatsView.vue';
 
 const routes = [
     { path: '/', component: WelcomeView },  
@@ -13,6 +14,7 @@ const routes = [
     { path: '/pomodoro', component: PomodoroView },
     { path: '/forgot-password', component: ForgotPasswordView },
     { path: '/reset-password', component: ResetPasswordView },
+    { path: '/stats', component: StatsView},
 ];
 
 const router = createRouter({
