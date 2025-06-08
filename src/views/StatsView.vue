@@ -28,6 +28,9 @@ export default {
     t() {
       return translations[useLanguage().lang.value];
     },
+    currentLang() {
+      return useLanguage().lang.value;
+    }
   },
   methods: {
     changeSection(section) {
@@ -52,7 +55,16 @@ export default {
         this.chartInstance.destroy();
       }
 
-      const labels = this.statsData.completedStats.map(e => e.date);
+      const labels = this.statsData.completedStats.map(e => {
+        const dateObj = new Date(e.date);
+        const locale = this.currentLang === 'ro' ? 'ro-RO' : 'en-US';
+        return dateObj.toLocaleDateString(locale, {
+          day: '2-digit',
+          month: 'short'
+        });
+      });
+
+
       const dataPoints = this.statsData.completedStats.map(e => e.count);
 
       this.chartInstance = new Chart(ctx, {
@@ -113,7 +125,7 @@ export default {
           bar: {
             borderRadius: 6,
             barThickness: "flex",
-            maxBarThickness: 40,
+            maxBarThickness: 35,
             categoryPercentage: 0.6,
             barPercentage: 0.7
           }
@@ -131,10 +143,12 @@ export default {
         this.monthlyChartInstance.destroy();
       }
 
-      const labels2 = this.monthlyStatsData.completedStats.map(e => {
-        const dateObj = new Date(e.date);
-        return dateObj.toLocaleDateString("default", {month: "long"});
-      });
+      const locale = this.currentLang === 'ro' ? 'ro-RO' : 'en-US';
+        const labels2 = this.monthlyStatsData.completedStats.map(e => {
+          const dateObj = new Date(e.date);
+          return dateObj.toLocaleDateString(locale, { month: "long" });
+        });
+
       const dataPoints2 = this.monthlyStatsData.completedStats.map(e => e.count);
 
       this.monthlyChartInstance = new Chart(ctx2, {
@@ -144,8 +158,8 @@ export default {
           datasets: [{
             label: this.t.completedTasksPerDayMonthly,
             data: dataPoints2,
-            backgroundColor: "#4caf50",
-            borderColor: "#388e3c",
+            backgroundColor: "#002241",
+            borderColor: "#00172e",
             borderWidth: 1,
             //barpercentage: 0.8,
             //categoryPercentage: 0.9,
@@ -168,7 +182,7 @@ export default {
               },
               title: { 
                 display: true, 
-                text: this.t.day, 
+                text: this.t.month, 
                 font: { size: 14 }
               } 
             },
@@ -198,7 +212,7 @@ export default {
           bar: {
             borderRadius: 6,
             barThickness: "flex",
-            maxBarThickness: 40,
+            maxBarThickness: 35,
             categoryPercentage: 0.6,
             barPercentage: 0.7
           }
@@ -253,6 +267,16 @@ export default {
         }
       }
     );
+    watch(
+      () => this.currentLang,
+      () => {
+        this.$nextTick(() => {
+          this.renderChart();
+          this.renderMonthlyChart();
+        });
+      }
+    );
+
   },
 
   beforeUnmount() {

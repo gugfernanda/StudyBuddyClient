@@ -46,9 +46,12 @@ export default {
                 
             } catch (error) {
                 if (error.response && error.response.data.error) {
-                    this.errorMessage = error.response.data.error;
-                } else {
-                    this.errorMessage = this.t.errorGeneric;
+                    const msg = error.response.data.error;
+                    if (msg === 'Invalid credentials') {
+                        this.errorMessage = this.t.errorInvalid;
+                    } else {
+                        this.errorMessage = msg;
+                    }
                 }           
              }
         },
